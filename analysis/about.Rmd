@@ -5,4 +5,4 @@ output:
     toc: false
 ---
 
-Describe your project.
+This project is aimed at using an ALS dataset to model and map understorey vegetation attributes in the study forest. In addition to the ALS data we had extensive Reccee plots describing the understrey vegetation layer. The intention is that these maps may be able to guide transition from plantations to other forest types 
