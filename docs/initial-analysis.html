@@ -9,9 +9,11 @@
 <meta name="generator" content="pandoc" />
 
 
+<meta name="author" content="jonathandash" />
 
+<meta name="date" content="2018-08-27" />
 
-<title>Home</title>
+<title>initial-analysis</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -19,6 +21,9 @@
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
@@ -169,6 +174,101 @@ $(document).ready(function () {
 
 
 
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
 
 
 <div class="navbar navbar-default  navbar-fixed-top" role="navigation">
@@ -216,7 +316,9 @@ div.section {
 
 
 
-<h1 class="title toc-ignore">Home</h1>
+<h1 class="title toc-ignore">initial-analysis</h1>
+<h4 class="author"><em>jonathandash</em></h4>
+<h4 class="date"><em>2018-08-27</em></h4>
 
 </div>
 
@@ -227,6 +329,21 @@ div.section {
 <li>
 <p><details> <summary> <strong style="color:blue;">✔</strong> <strong>R Markdown file:</strong> up-to-date </summary></p>
 <p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Environment:</strong> empty </summary></p>
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Seed:</strong> <code>set.seed(20180827)</code> </summary></p>
+<p>The command <code>set.seed(20180827)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</details>
+</li>
+<li>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Session information:</strong> recorded </summary></p>
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
 </details>
 </li>
 <li>
@@ -270,7 +387,7 @@ Message
 Rmd
 </td>
 <td style="text-align:left;">
-<a href="https://github.com/jonathandash/understorey/blob/7720d157435a79d18ef06487c8094de29ce22ff0/analysis/index.Rmd" target="_blank">7720d15</a>
+<a href="https://github.com/jonathandash/understorey/blob/7720d157435a79d18ef06487c8094de29ce22ff0/analysis/initial-analysis.Rmd" target="_blank">7720d15</a>
 </td>
 <td style="text-align:left;">
 jonathandash
@@ -282,47 +399,105 @@ jonathandash
 Add my first analysis
 </td>
 </tr>
-<tr>
-<td style="text-align:left;">
-html
-</td>
-<td style="text-align:left;">
-<a href="https://cdn.rawgit.com/jonathandash/understorey/313195ec01f64a9771aee18be32785a0789898ed/docs/index.html" target="_blank">313195e</a>
-</td>
-<td style="text-align:left;">
-JonathanDash
-</td>
-<td style="text-align:left;">
-2018-08-27
-</td>
-<td style="text-align:left;">
-Build site.
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Rmd
-</td>
-<td style="text-align:left;">
-<a href="https://github.com/jonathandash/understorey/blob/17be105eba6ee30eb362e48e4c22be7e142175e3/analysis/index.Rmd" target="_blank">17be105</a>
-</td>
-<td style="text-align:left;">
-JonathanDash
-</td>
-<td style="text-align:left;">
-2018-08-27
-</td>
-<td style="text-align:left;">
-Start workflowr project.
-</td>
-</tr>
 </tbody>
 </table>
 </ul>
 <p></details></p>
 <hr />
-<p>Welcome to my research website.</p>
-<p>Click on this <a href="first-analysis.html">link</a> to see my results.</p>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>This analysis is designed to investigate the ALS metrics for the field plots and identify important predictors. Once these are produced we generate useful metrics and produce initial maps.</p>
+<pre class="r"><code>#### Setup project ####
+library(here)</code></pre>
+<pre><code>here() starts at E:/understorey</code></pre>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>-- Attaching packages ------------------------------------------------------------------------------------------- tidyverse 1.2.1 --</code></pre>
+<pre><code>v ggplot2 3.0.0     v purrr   0.2.5
+v tibble  1.4.2     v dplyr   0.7.6
+v tidyr   0.8.1     v stringr 1.3.1
+v readr   1.1.1     v forcats 0.3.0</code></pre>
+<pre><code>-- Conflicts ---------------------------------------------------------------------------------------------- tidyverse_conflicts() --
+x dplyr::filter() masks stats::filter()
+x dplyr::lag()    masks stats::lag()</code></pre>
+<pre class="r"><code>library(corrplot)</code></pre>
+<pre><code>corrplot 0.84 loaded</code></pre>
+<pre class="r"><code>library(randomForest)</code></pre>
+<pre><code>randomForest 4.6-14</code></pre>
+<pre><code>Type rfNews() to see new features/changes/bug fixes.</code></pre>
+<pre><code>
+Attaching package: &#39;randomForest&#39;</code></pre>
+<pre><code>The following object is masked from &#39;package:dplyr&#39;:
+
+    combine</code></pre>
+<pre><code>The following object is masked from &#39;package:ggplot2&#39;:
+
+    margin</code></pre>
+<pre class="r"><code>library(caret)</code></pre>
+<pre><code>Loading required package: lattice</code></pre>
+<pre><code>
+Attaching package: &#39;caret&#39;</code></pre>
+<pre><code>The following object is masked from &#39;package:purrr&#39;:
+
+    lift</code></pre>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.5.1 (2018-07-02)
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+Running under: Windows 10 x64 (build 14393)
+
+Matrix products: default
+
+locale:
+[1] LC_COLLATE=English_New Zealand.1252 
+[2] LC_CTYPE=English_New Zealand.1252   
+[3] LC_MONETARY=English_New Zealand.1252
+[4] LC_NUMERIC=C                        
+[5] LC_TIME=English_New Zealand.1252    
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+ [1] caret_6.0-80        lattice_0.20-35     randomForest_4.6-14
+ [4] corrplot_0.84       forcats_0.3.0       stringr_1.3.1      
+ [7] dplyr_0.7.6         purrr_0.2.5         readr_1.1.1        
+[10] tidyr_0.8.1         tibble_1.4.2        ggplot2_3.0.0      
+[13] tidyverse_1.2.1     here_0.1           
+
+loaded via a namespace (and not attached):
+ [1] nlme_3.1-137       lubridate_1.7.4    dimRed_0.1.0      
+ [4] httr_1.3.1         rprojroot_1.3-2    tools_3.5.1       
+ [7] backports_1.1.2    R6_2.2.2           rpart_4.1-13      
+[10] lazyeval_0.2.1     colorspace_1.3-2   nnet_7.3-12       
+[13] withr_2.1.2        tidyselect_0.2.4   mnormt_1.5-5      
+[16] compiler_3.5.1     git2r_0.23.0       cli_1.0.0         
+[19] rvest_0.3.2        xml2_1.2.0         scales_0.5.0      
+[22] sfsmisc_1.1-2      DEoptimR_1.0-8     psych_1.8.4       
+[25] robustbase_0.93-2  digest_0.6.15      foreign_0.8-70    
+[28] rmarkdown_1.10     R.utils_2.6.0      pkgconfig_2.0.1   
+[31] htmltools_0.3.6    rlang_0.2.1        readxl_1.1.0      
+[34] ddalpha_1.3.4      rstudioapi_0.7     bindr_0.1.1       
+[37] jsonlite_1.5       ModelMetrics_1.2.0 R.oo_1.22.0       
+[40] magrittr_1.5       Matrix_1.2-14      Rcpp_0.12.17      
+[43] munsell_0.5.0      abind_1.4-5        R.methodsS3_1.7.1 
+[46] stringi_1.1.7      whisker_0.3-2      yaml_2.1.19       
+[49] MASS_7.3-50        plyr_1.8.4         recipes_0.1.3     
+[52] grid_3.5.1         pls_2.7-0          parallel_3.5.1    
+[55] crayon_1.3.4       haven_1.1.2        splines_3.5.1     
+[58] hms_0.4.2          knitr_1.20         pillar_1.3.0      
+[61] stats4_3.5.1       reshape2_1.4.3     codetools_0.2-15  
+[64] CVST_0.2-2         magic_1.5-8        glue_1.2.0        
+[67] evaluate_0.10.1    data.table_1.11.4  modelr_0.1.2      
+[70] foreach_1.4.4      cellranger_1.1.0   gtable_0.2.0      
+[73] kernlab_0.9-27     assertthat_0.2.0   DRR_0.0.3         
+[76] gower_0.1.2        prodlim_2018.04.18 broom_0.4.5       
+[79] class_7.3-14       survival_2.42-3    geometry_0.3-6    
+[82] timeDate_3043.102  RcppRoll_0.3.0     iterators_1.0.10  
+[85] lava_1.6.3         workflowr_1.1.1    bindrcpp_0.2.2    
+[88] ipred_0.9-7       </code></pre>
+</div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
 TeX fonts only; see
@@ -345,6 +520,8 @@ footer is added to webpages before the MathJax javascript. -->
 <hr>
 
 
+</div>
+</div>
 
 </div>
 
