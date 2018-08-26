@@ -1,0 +1,21 @@
+---
+title: "initial-analysis"
+author: "jonathandash"
+date: "2018-08-27"
+output: workflowr::wflow_html
+---
+
+## Introduction
+This analysis is designed to investigate the ALS metrics for the field plots and identify important predictors. Once these are produced we generate useful metrics and produce initial maps.
+
+```{r}
+#### Setup project ####
+library(here)
+library(tidyverse)
+library(corrplot)
+library(randomForest)
+library(caret)
+```
+
+
+
