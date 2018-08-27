@@ -15,6 +15,7 @@ library(tidyverse)
 library(corrplot)
 library(randomForest)
 library(caret)
+library(party)
 
 #### Read data and merge ####
 
@@ -230,5 +231,260 @@ corrplot.mixed(M, upper = "circle", lower = "number",
 dev.off()
 ```
 
+Looks like a lot of the voxel metrics are correlated with themselves and some conventional metrics like bincentiles.
+
+```{r}
+plot(b10~ SCI_2, data = ref) # looks like a lot of the voxel metrics are highly correlated with the lower
+```
+
+
+The response variables suggested by Richard Ewans in an e-mail response are listed below. Suggest these arereviewed by Thomas
+ at a later date.
+ 
+1. Average top height of native subcanopy - (Column I; native ATH)
+2. Canopy cover of native subcanopy - (Column J; nativeCC)
+3. Number of tree fern stems - (Column K; treefernstems)
+4. Number of native woody stems (other than tree ferns) - (Column L; nativestems)
+5. Number of different native woody species higher than 2m (including tree ferns) - (Column N; nativestemspecies)
+6. Total number of different native species - (Column O; nativespecies)
+
+```{r}
+# Specify response variables
+responses<-ref[ c(9,10,11,12,14,15)]
+head(responses)
+nrow(responses)
+nrow(preds)
+```
+
+We used Caret for identifying important variables and feature selection. Do this for or the height of native subcanopy first.
+
+```{r}
+#### Rank feature importance ####
+# Native ATH first
+
+mod.df<-cbind(responses$nativeATH, preds)
+colnames(mod.df)[colnames(mod.df) == 'responses$nativeATH'] <- 'nativeATH'
+
+rf_fit_nat_ATH<-train(nativeATH ~ ., 
+                      data = mod.df,
+                      method = "ranger")
+set.seed(7)
+# prepare training scheme
+control <- trainControl(method="repeatedcv", number=10, repeats=5)
+# train the model
+model <- train(nativeATH~., data=mod.df, method="cforest",  trControl=control)
+# estimate variable importance
+importance <- varImp(model, scale=FALSE)
+# summarize importance
+print(importance)
+# plot importance
+plot(importance)
+
+#### Feature Selection ####
+set.seed(7)
+
+# define the control using a random forest selection function
+control <- rfeControl(functions=rfFuncs, method="cv", number=10)
+# run the RFE algorithm
+results <- rfe(mod.df[,2:70], mod.df[,1], sizes=c(1:10), rfeControl=control)
+# summarize the results
+print(results)
+# list the chosen features
+predictors(results)
+# plot the results
+plot(results, type=c("g", "o"))
+```
+
+
+Now use the same approach for native canopy cover.
+
+```{r}
+#nativeCC
+
+mod.df<-cbind(responses$nativeCC, preds)
+colnames(mod.df)[colnames(mod.df) == 'responses$nativeCC'] <- 'nativeCC'
+
+rf_fit_nat_CC<-train(nativeCC ~ ., 
+                     data = mod.df,
+                     method = "ranger")
+
+
+
+# prepare training scheme
+control <- trainControl(method="repeatedcv", number=10, repeats=3)
+# train the model
+model <- train(nativeCC~., data=mod.df, method="cforest",  trControl=control)
+# estimate variable importance
+importance <- varImp(model, scale=FALSE)
+# summarize importance
+print(importance)
+# plot importance
+plot(importance)
+
+#### Feature Selection ####
+set.seed(7)
+
+# define the control using a random forest selection function
+control <- rfeControl(functions=rfFuncs, method="cv", number=10)
+# run the RFE algorithm
+results <- rfe(mod.df[,2:70], mod.df[,1], sizes=c(1:8), rfeControl=control)
+# summarize the results
+print(results)
+# list the chosen features
+predictors(results)
+# plot the results
+plot(results, type=c("g", "o"))
+```
+
+Use the same approach for Tree fern stems
+
+```{r}
+# treefernstems
+
+mod.df<-cbind(responses$treefernstems, preds)
+colnames(mod.df)[colnames(mod.df) == 'responses$treefernstems'] <- 'treefernstems'
+
+rf_fit_treeferns<-train(treefernstems ~ ., 
+                        data = mod.df,
+                        method = "ranger")
+
+# prepare training scheme
+control <- trainControl(method="repeatedcv", number=10, repeats=3)
+# train the model
+model <- train(treefernstems~., data=mod.df, method="cforest",  trControl=control)
+# estimate variable importance
+importance <- varImp(model, scale=FALSE)
+# summarize importance
+print(importance)
+# plot importance
+plot(importance)
+
+#### Feature Selection ####
+set.seed(7)
+
+# define the control using a random forest selection function
+control <- rfeControl(functions=rfFuncs, method="cv", number=10)
+# run the RFE algorithm
+results <- rfe(mod.df[,2:70], mod.df[,1], sizes=c(1:8), rfeControl=control)
+# summarize the results
+print(results)
+# list the chosen features
+predictors(results)
+# plot the results
+plot(results, type=c("g", "o"))
+```
+
+Number of native stems
+
+```{r}
+#native stems
+
+mod.df<-cbind(responses$nativestems, preds)
+colnames(mod.df)[colnames(mod.df) == 'responses$nativestems'] <- 'nativestems'
+
+rf_fit_treeferns<-train(nativestems ~ ., 
+                        data = mod.df,
+                        method = "ranger")
+
+rf_fit_treeferns
+# prepare training scheme
+control <- trainControl(method="repeatedcv", number=10, repeats=3)
+# train the model
+model <- train(nativestems~., data=mod.df, method="cforest",  trControl=control)
+# estimate variable importance
+importance <- varImp(model, scale=FALSE)
+# summarize importance
+print(importance)
+# plot importance
+plot(importance)
+
+#### Feature Selection ####
+set.seed(7)
+
+# define the control using a random forest selection function
+control <- rfeControl(functions=rfFuncs, method="cv", number=10)
+# run the RFE algorithm
+results <- rfe(mod.df[,2:70], mod.df[,1], sizes=c(1:8), rfeControl=control)
+# summarize the results
+print(results)
+# list the chosen features
+predictors(results)
+# plot the results
+plot(results, type=c("g", "o"))
+```
+
+Number of native stem species
+```{r}
+#nativestemspecies
+
+mod.df<-cbind(responses$nativestemspecies, preds)
+colnames(mod.df)[colnames(mod.df) == 'responses$nativestemspecies'] <- 'nativestemspecies'
+
+rf_fit_treeferns<-train(nativestemspecies ~ ., 
+                        data = mod.df,
+                        method = "ranger")
+
+# prepare training scheme
+control <- trainControl(method="repeatedcv", number=10, repeats=3)
+# train the model
+model <- train(nativestemspecies~., data=mod.df, method="cforest",  trControl=control)
+# estimate variable importance
+importance <- varImp(model, scale=FALSE)
+# summarize importance
+print(importance)
+# plot importance
+plot(importance)
+
+#### Feature Selection ####
+set.seed(7)
+
+# define the control using a random forest selection function
+control <- rfeControl(functions=rfFuncs, method="cv", number=10)
+# run the RFE algorithm
+results <- rfe(mod.df[,2:70], mod.df[,1], sizes=c(1:8), rfeControl=control)
+# summarize the results
+print(results)
+# list the chosen features
+predictors(results)
+# plot the results
+plot(results, type=c("g", "o"))
+```
+
+Number of native species
+```{r}
+#nativespecies
+
+mod.df<-cbind(responses$nativespecies, preds)
+colnames(mod.df)[colnames(mod.df) == 'responses$nativespecies'] <- 'nativespecies'
+
+rf_fit_treeferns<-train(nativespecies ~ ., 
+                        data = mod.df,
+                        method = "ranger")
+
+# prepare training scheme
+control <- trainControl(method="repeatedcv", number=10, repeats=3)
+# train the model
+model <- train(nativespecies~., data=mod.df, method="cforest",  trControl=control)
+# estimate variable importance
+importance <- varImp(model, scale=FALSE)
+# summarize importance
+print(importance)
+# plot importance
+plot(importance)
+
+#### Feature Selection ####
+set.seed(7)
+
+# define the control using a random forest selection function
+control <- rfeControl(functions=rfFuncs, method="cv", number=10)
+# run the RFE algorithm
+results <- rfe(mod.df[,2:70], mod.df[,1], sizes=c(1:8), rfeControl=control)
+# summarize the results
+print(results)
+# list the chosen features
+predictors(results)
+# plot the results
+plot(results, type=c("g", "o"))
+```
 
 
