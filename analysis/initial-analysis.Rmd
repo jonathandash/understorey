@@ -29,8 +29,8 @@ glimpse(als.df)
 glimpse(f.df)
 
 # looks like plot names are not consistent
-head(als.df)
-head(f.df)
+#head(als.df)
+#head(f.df)
 
 # Check with GP that these als lines are logical... If so proceed bying making a linking identifier.
 # GP confirmed on Slack message
@@ -39,7 +39,7 @@ head(f.df)
 als.df$identifier<-paste('RR', als.df$PlotID, sep='') # Checked with GP and seems reasonable
 ref<-merge(f.df, als.df, by.x = 'plot', by.y = 'identifier')
 
-str(ref)
+#str(ref)
 
 #### review correlations ####
 

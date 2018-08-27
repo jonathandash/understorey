@@ -6,6 +6,6 @@ output:
     toc: false
 ---
 
-Welcome to my research website.
+Welcome to the website for the results of the ALS informed mapping of understorey vegetaion.
 
-Click on this [link](initial-analysis.html) to see my results.
+Click on this [link](initial-analysis.html) to see the results of the variable selection.
