@@ -15,6 +15,219 @@ library(tidyverse)
 library(corrplot)
 library(randomForest)
 library(caret)
+
+#### Read data and merge ####
+
+# Read field data
+f.df<-read.csv(here('data', 'field-data.csv'))
+
+# Read Grant's lidar metrics
+als.df<-read.csv(here('data', 'allmetrics.csv'))
+
+glimpse(als.df)
+glimpse(f.df)
+
+# looks like plot names are not consistent
+head(als.df)
+head(f.df)
+
+# Check with GP that these als lines are logical... If so proceed bying making a linking identifier.
+# GP confirmed on Slack message
+
+# merge datasets
+als.df$identifier<-paste('RR', als.df$PlotID, sep='') # Checked with GP and seems reasonable
+ref<-merge(f.df, als.df, by.x = 'plot', by.y = 'identifier')
+
+str(ref)
+
+#### review correlations ####
+
+# Make a logic check plot the top height against ALS metrics
+
+plot(pineATH ~ p99, data = ref, xlim = c(5,40), ylim = c(5,40))
+
+# doesn't look great but  they may not know how to measure and calculate top height
+
+plot(pineage~ p99, data = ref, xlim = c(5,40), ylim = c(5,40))
+# limited variability within a big range of ages... may need review
+
+preds<-ref[ , 33:110] # define predictors
+
+stand.preds<-ref[ , c(2,3,4,5,6,7,8)] # define predictors related to plantation stand structure. This could 
+# allow us to test the hypothesis that ALS metrics are no better than stand structure for prediction.
+```
+
+
+Check correlation matrix for the stand variables
+```{r}
+# Plot correlations for stand variables
+#png(here('out', 'cor-matrix-stand-mets.png'), width = 20, height = 20, 
+#         units = "cm", res = 500, pointsize = 12,
+#         type = "cairo")
+M<-cor(ref[ ,c(9,10,11,12,14,15,  2:8)])
+corrplot.mixed(M, upper = "circle", lower = "number",
+               tl.pos = "lt", tl.col = "black", tl.offset=1) # too many variables not useful
+#dev.off()
+
+png(here('out', 'cor-matrix-stand-mets.png'), width = 20, height = 20, 
+         units = "cm", res = 500, pointsize = 12,
+         type = "cairo")
+M<-cor(ref[ ,c(9,10,11,12,14,15,  2:8)])
+corrplot.mixed(M, upper = "circle", lower = "number",
+               tl.pos = "lt", tl.col = "black", tl.offset=1) 
+dev.off()
+
+```
+
+Plot correlation matrix for height percentiles
+```{r}
+
+# Plot correlations for height percentiles
+#png(here('out', 'cor-matrix-ht-pct.png'), width = 25, height = 25, 
+#    units = "cm", res = 500, pointsize = 12,
+#    type = "cairo")
+M<-cor(ref[ ,c(9,10,11,12,14,15,  33:44)])
+corrplot.mixed(M, upper = "circle", lower = "number",
+               tl.pos = "lt", tl.col = "black", tl.offset=1) # too many variables not useful
+#dev.off()
+
+png(here('out', 'cor-matrix-ht-pct.png'), width = 25, height = 25, 
+    units = "cm", res = 500, pointsize = 12,
+    type = "cairo")
+M<-cor(ref[ ,c(9,10,11,12,14,15,  33:44)])
+corrplot.mixed(M, upper = "circle", lower = "number",
+               tl.pos = "lt", tl.col = "black", tl.offset=1) # too many variables not useful
+dev.off()
+
+```
+
+
+```{r}
+
+# Plot correlations for bincentiles
+#png(here('out', 'cor-matrix-ht-binc.png'), width = 20, height = 20, 
+#    units = "cm", res = 500, pointsize = 12,
+#    type = "cairo")
+M<-cor(ref[ ,c(9,10,11,12,14,15,  45:50)])
+corrplot.mixed(M, upper = "circle", lower = "number",
+               tl.pos = "lt", tl.col = "black", tl.offset=1) # too many variables not useful
+#dev.off()
+
+# Plot correlations for bincentiles
+png(here('out', 'cor-matrix-ht-binc.png'), width = 20, height = 20, 
+    units = "cm", res = 500, pointsize = 12,
+    type = "cairo")
+M<-cor(ref[ ,c(9,10,11,12,14,15,  45:50)])
+corrplot.mixed(M, upper = "circle", lower = "number",
+               tl.pos = "lt", tl.col = "black", tl.offset=1) # too many variables not useful
+dev.off()
+```
+
+Correlation matrix for height deciles
+```{r}
+
+# Plot correlations for deciles
+#png(here('out', 'cor-matrix-ht-deciles.png'), width = 20, height = 20, 
+#    units = "cm", res = 500, pointsize = 12,
+#    type = "cairo")
+M<-cor(ref[ ,c(9,10,11,12,14,15,  51:57)])
+corrplot.mixed(M, upper = "circle", lower = "number",
+               tl.pos = "lt", tl.col = "black", tl.offset=1) # too many variables not useful
+#dev.off()
+
+png(here('out', 'cor-matrix-ht-deciles.png'), width = 20, height = 20, 
+    units = "cm", res = 500, pointsize = 12,
+    type = "cairo")
+M<-cor(ref[ ,c(9,10,11,12,14,15,  51:57)])
+corrplot.mixed(M, upper = "circle", lower = "number",
+               tl.pos = "lt", tl.col = "black", tl.offset=1) # too many variables not useful
+dev.off()
+```
+
+
+Correlation matrix for cov - voxels
+```{r}
+# Plot correlations for voxels_cov
+#png(here('out', 'cor-matrix-vox_cov.png'), width = 20, height = 20, 
+#    units = "cm", res = 500, pointsize = 12,
+#    type = "cairo")
+M<-cor(ref[ ,c(9,10,11,12,14,15,  72:77)])
+corrplot.mixed(M, upper = "circle", lower = "number",
+               tl.pos = "lt", tl.col = "black", tl.offset=1) # too many variables not useful
+#dev.off()
+
+png(here('out', 'cor-matrix-vox_cov.png'), width = 20, height = 20, 
+    units = "cm", res = 500, pointsize = 12,
+    type = "cairo")
+M<-cor(ref[ ,c(9,10,11,12,14,15,  72:77)])
+corrplot.mixed(M, upper = "circle", lower = "number",
+               tl.pos = "lt", tl.col = "black", tl.offset=1) # too many variables not useful
+dev.off()
+```
+
+Correlation matric for VCI - SCI voxel metrics
+```{r}
+# Plot correlations for voxels_VCI_SCI
+#png(here('out', 'cor-matrix-vox_VCI_SCI.png'), width = 20, height = 20, 
+#    units = "cm", res = 500, pointsize = 12,
+#    type = "cairo")
+M<-cor(ref[ ,c(9,10,11,12,14,15,  78:86)])
+corrplot.mixed(M, upper = "circle", lower = "number",
+               tl.pos = "lt", tl.col = "black", tl.offset=1) # too many variables not useful
+#dev.off()
+
+png(here('out', 'cor-matrix-vox_VCI_SCI.png'), width = 20, height = 20, 
+    units = "cm", res = 500, pointsize = 12,
+    type = "cairo")
+M<-cor(ref[ ,c(9,10,11,12,14,15,  78:86)])
+corrplot.mixed(M, upper = "circle", lower = "number",
+               tl.pos = "lt", tl.col = "black", tl.offset=1) # too many variables not useful
+dev.off()
+```
+
+More correlations for Voxel metrics
+
+```{r}
+
+# Plot correlations for voxels_cc
+#png(here('out', 'cor-matrix-vox_cc.png'), width = 25, height = 25, 
+#    units = "cm", res = 500, pointsize = 12,
+#    type = "cairo")
+M<-cor(ref[ ,c(9,10,11,12,14,15,  87:97)])
+corrplot.mixed(M, upper = "circle", lower = "number",
+               tl.pos = "lt", tl.col = "black", tl.offset=1) # too many variables not useful
+#dev.off()
+
+# Plot correlations for voxels_cc
+png(here('out', 'cor-matrix-vox_cc.png'), width = 25, height = 25, 
+    units = "cm", res = 500, pointsize = 12,
+    type = "cairo")
+M<-cor(ref[ ,c(9,10,11,12,14,15,  87:97)])
+corrplot.mixed(M, upper = "circle", lower = "number",
+               tl.pos = "lt", tl.col = "black", tl.offset=1) # too many variables not useful
+dev.off()
+```
+
+More correlations for Voxel metrics
+
+```{r}
+
+# Plot correlations for voxels_cc
+#png(here('out', 'cor-matrix-vox_Pcc-end.png'), width = 25, height = 25, 
+#    units = "cm", res = 500, pointsize = 12,
+#    type = "cairo")
+M<-cor(ref[ ,c(9,10,11,12,14,15,  98:110)])
+corrplot.mixed(M, upper = "circle", lower = "number",
+               tl.pos = "lt", tl.col = "black", tl.offset=1) # too many variables not useful
+#dev.off()
+
+png(here('out', 'cor-matrix-vox_Pcc-end.png'), width = 25, height = 25, 
+    units = "cm", res = 500, pointsize = 12,
+    type = "cairo")
+M<-cor(ref[ ,c(9,10,11,12,14,15,  98:110)])
+corrplot.mixed(M, upper = "circle", lower = "number",
+               tl.pos = "lt", tl.col = "black", tl.offset=1) # too many variables not useful
+dev.off()
 ```
 
 
