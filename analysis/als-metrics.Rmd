@@ -1,0 +1,106 @@
+---
+title: "als-metrics"
+author: "jonathandash"
+date: "2018-08-27"
+output: workflowr::wflow_html
+---
+
+## Introduction
+This analysis will generate rasters of the key lidar metrics for the Hunua ALS dataset. Will use lidR wherever possible and check the results against LAStools. The ALS data were buffered, normalised against the local DTM, buffered and tiled using LAStools.
+
+```{r, echo=FALSE}
+
+#setup libraries
+
+library(lidR)
+library(tidyverse)
+library(sp)
+library(sf)
+library(raster)
+library(here)
+```
+
+
+```{r}
+cell_size = 25
+
+crs_str = "+proj=tmerc +lat_0=0 +lon_0=173 +k=0.9996 +x_0=1600000 +y_0=10000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+
+ctg = catalog(here('normalised-als'))
+
+cores(ctg)<-1
+buffer(ctg) <- 0
+crs(ctg)<-crs_str
+
+#LAScatalog-class(ctg, buffer = 0, multicore = 1, by_file = FALSE) #, tiling_size = 100) #by_file = TRUE overrides tile size arg.
+
+plot(ctg)
+
+
+```
+
+Getting errors from lidR about the input files being buffered. They definitely aren't although they have been. I have checked the buffering with lastile.
+
+```{r}
+# Specify metrics
+# use grant's code for solberg coefficient (SCI)
+
+
+myMetrics = function(Z, I, ReturnNumber, NumberOfReturns){
+  # Computes Solberg's Cover Index based on return types
+  # ht = height threshold. Hard code if lidR still wont pass arguments in parallel mode.  
+  first_idx = ReturnNumber == 1
+  firstofmany_idx = ReturnNumber == 1 & NumberOfReturns > 1  # First of many
+  only_idx = NumberOfReturns == 1
+  middle_idx = ReturnNumber != 1 & ReturnNumber < NumberOfReturns
+  last_idx = ReturnNumber == NumberOfReturns
+  lastofmany_idx = NumberOfReturns > 1 & ReturnNumber == NumberOfReturns # Last of many     
+  
+  # Solberg's Cover Index
+  ht = 5 # hard coded
+  SCInum = sum(Z[only_idx] > ht) + 0.5 * (sum(Z[firstofmany_idx] > ht) + sum(Z[lastofmany_idx] > ht))
+  SCIdenom = sum(only_idx) + 0.5 *(sum(first_idx) + sum(last_idx))
+  SCI = SCInum / SCIdenom
+  
+  # JD:
+  # possible you can just do return(SCI) but can't remember if lidR
+  # really wants a list here to add XY raster values to. This works though
+  metrics = list(SCI = SCI)
+  return(metrics)
+}
+
+
+```
+
+
+Run the gridmetrics code. Still appear to be having problems with multi core grid_catalog
+
+```{r}
+
+############ Run grid metrics##############################
+
+metrics = grid_metrics(ctg, myMetrics(Z = Z, ReturnNumber = ReturnNumber, NumberOfReturns = NumberOfReturns), res = cell_size)
+metrics
+#str(metrics)
+dfr = raster::rasterFromXYZ(metrics, crs = crs_str)
+plot(dfr)
+
+```
+
+
+
+```{r}
+#png(here('out', 'SCI_2m.png'), h=20, w=20, units='cm', res=500)
+png(here('out', 'SCI2m.png'), width = 20, height = 20, 
+         units = "cm", res = 500, pointsize = 12,
+         type = "cairo")
+
+plot(dfr, col = rainbow(100))
+dev.off()
+
+writeRaster(dfr, here('out', 'SCI_2m.tif'), overwrite=TRUE)
+
+```
+
+
+

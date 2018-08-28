@@ -9,3 +9,5 @@ output:
 Welcome to the website for the results of the ALS informed mapping of understorey vegetaion.
 
 Click on this [link](initial-analysis.html) to see the results of the variable selection.
+
+Click on this [link](als-metrics.html) to see the predictor lidar rasters.

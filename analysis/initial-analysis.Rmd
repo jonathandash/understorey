@@ -8,6 +8,13 @@ output: workflowr::wflow_html
 ## Introduction
 This analysis is designed to investigate the ALS metrics for the field plots and identify important predictors. Once these are produced we generate useful metrics and produce initial maps.
 
+```{r global_options, include=FALSE}
+rm(list=ls()) ### To clear namespace
+library(knitr)
+opts_chunk$set(fig.width=12, fig.height=8, fig.path='out/',
+               echo=TRUE, warning=FALSE, message=FALSE)
+```
+
 ```{r}
 #### Setup project ####
 library(here)
@@ -16,6 +23,7 @@ library(corrplot)
 library(randomForest)
 library(caret)
 library(party)
+library(raster)
 
 #### Read data and merge ####
 
@@ -25,14 +33,14 @@ f.df<-read.csv(here('data', 'field-data.csv'))
 # Read Grant's lidar metrics
 als.df<-read.csv(here('data', 'allmetrics.csv'))
 
-glimpse(als.df)
-glimpse(f.df)
+#glimpse(als.df)
+#glimpse(f.df)
 
 # looks like plot names are not consistent
 #head(als.df)
 #head(f.df)
 
-# Check with GP that these als lines are logical... If so proceed bying making a linking identifier.
+# Check with GP that these als linaes are logical... If so proceed bying making a linking identifier.
 # GP confirmed on Slack message
 
 # merge datasets
@@ -40,14 +48,48 @@ als.df$identifier<-paste('RR', als.df$PlotID, sep='') # Checked with GP and seem
 ref<-merge(f.df, als.df, by.x = 'plot', by.y = 'identifier')
 
 #str(ref)
+```
 
+```{r, echo=FALSE}
+# Read raster predictor data
+
+pred.sci_2<-raster(here('normalised-als/rasters_m', 'SCI_2m.tif'))
+names(pred.sci_2)<- 'SCI_2'
+pred.dns<-raster(here('normalised-als/rasters_m', '1786000_5896500_dns.tif'))
+names(pred.dns)<-'dns'
+pred.c01<-raster(here('normalised-als/rasters_m', '1786000_5896500_c01.tif'))
+names(pred.c01)<-'c01'
+pred.p25<-raster(here('normalised-als/rasters_m', '1786000_5896500_p25.tif'))
+names(pred.p25)<-'p25'
+pred.b10<-raster(here('normalised-als/rasters_m', '1786000_5896500_b10.tif'))
+names(pred.b10)<-'b10'
+pred.b05<-raster(here('normalised-als/rasters_m', '1786000_5896500_b05.tif'))
+names(pred.b05)<-'b05'
+pred.ske<-raster(here('normalised-als/rasters_m', '1786000_5896500_ske.tif'))
+names(pred.ske)<-'ske'
+pred.d01<-raster(here('normalised-als/rasters_m', '1786000_5896500_d01.tif'))
+names(pred.d01)<-'d01'
+pred.p10<-raster(here('normalised-als/rasters_m', '1786000_5896500_p10.tif'))
+names(pred.p10)<-'p10'
+
+pred.rast<-stack(pred.sci_2, pred.dns, pred.c01, pred.p25, pred.b10, pred.b05, pred.ske,
+                 pred.d01, pred.p10)
+#names(pred.rast)
+
+pred.rast.df<-as.data.frame(pred.rast, xy = TRUE)
+
+
+```
+
+
+```{r}
 #### review correlations ####
 
 # Make a logic check plot the top height against ALS metrics
 
 plot(pineATH ~ p99, data = ref, xlim = c(5,40), ylim = c(5,40))
 
-# doesn't look great but  they may not know how to measure and calculate top height
+## doesn't look great but  they may not know how to measure and calculate top height
 
 plot(pineage~ p99, data = ref, xlim = c(5,40), ylim = c(5,40))
 # limited variability within a big range of ages... may need review
@@ -248,7 +290,7 @@ The response variables suggested by Richard Ewans in an e-mail response are list
 5. Number of different native woody species higher than 2m (including tree ferns) - (Column N; nativestemspecies)
 6. Total number of different native species - (Column O; nativespecies)
 
-```{r}
+```{r,echo=FALSE}
 # Specify response variables
 responses<-ref[ c(9,10,11,12,14,15)]
 head(responses)
@@ -294,9 +336,24 @@ predictors(results)
 # plot the results
 plot(results, type=c("g", "o"))
 ```
+Now use these predictors to model native understorey height by fitting a RF model with the selected predictors.
+
+```{r, echo=F}
+rf_fit_nat_ATH<-train(nativeATH ~ dns + SCI_2 + c01 + p25 + b10, 
+                      data = mod.df,
+                      method = "ranger")
+
+print(rf_fit_nat_ATH)
+
+nat_ATH_out<-raster::predict(pred.rast, rf_fit_nat_ATH)
+plot(nat_ATH_out)
+writeRaster(nat_ATH_out, here('out', 'native_TH.tif'), overwrite = T)
+
+```
 
 
-Now use the same approach for native canopy cover.
+
+Now use the same predictor variable selection approach for native canopy cover.
 
 ```{r}
 #nativeCC
@@ -335,6 +392,24 @@ predictors(results)
 # plot the results
 plot(results, type=c("g", "o"))
 ```
+
+Now use these predictors to model native understorey canopy cover percentage by fitting a RF model with the selected predictors.
+
+```{r, echo=F}
+
+rf_fit_nat_CC<-train(nativeCC ~ b05 + dns + b10 + SCI_2 + p10 + ske + d01, 
+                     data = mod.df,
+                     method = "ranger")
+
+print(rf_fit_nat_ATH)
+
+nat_CC_out<-raster::predict(pred.rast, rf_fit_nat_CC)
+plot(nat_CC_out)
+writeRaster(nat_CC_out, here('out', 'native_CC.tif'), overwrite=T)
+
+```
+```
+
 
 Use the same approach for Tree fern stems
 
