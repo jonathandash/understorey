@@ -91,14 +91,14 @@ plot(dfr)
 
 ```{r}
 #png(here('out', 'SCI_2m.png'), h=20, w=20, units='cm', res=500)
-png(here('out', 'SCI2m.png'), width = 20, height = 20, 
-         units = "cm", res = 500, pointsize = 12,
-         type = "cairo")
+#png(here('out', 'SCI2m.png'), width = 20, height = 20, 
+ #        units = "cm", res = 500, pointsize = 12,
+  #       type = "cairo")
 
-plot(dfr, col = rainbow(100))
-dev.off()
+#plot(dfr, col = rainbow(100))
+#dev.off()
 
-writeRaster(dfr, here('out', 'SCI_2m.tif'), overwrite=TRUE)
+writeRaster(dfr, here('out', 'SCI_5m.tif'), overwrite=TRUE)
 
 ```
 
