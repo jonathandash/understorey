@@ -323,7 +323,7 @@ div.section {
 </div>
 
 
-<p><strong>Last updated:</strong> 2018-08-27</p>
+<p><strong>Last updated:</strong> 2018-08-28</p>
 <strong>workflowr checks:</strong> <small>(Click a bullet for more information)</small>
 <ul>
 <li>
@@ -347,17 +347,25 @@ div.section {
 </details>
 </li>
 <li>
-<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/jonathandash/understorey/tree/db70f0453044cc485dfa6d2a5918be0943d07ea7" target="_blank">db70f04</a> </summary></p>
+<p><details> <summary> <strong style="color:blue;">✔</strong> <strong>Repository version:</strong> <a href="https://github.com/jonathandash/understorey/tree/7505f73a09b63653bb2a6859f75b89c4f4d7ee14" target="_blank">7505f73</a> </summary></p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 <pre><code>
 Ignored files:
     Ignored:    .Rproj.user/
+    Ignored:    normalised-als/
 
 Untracked files:
+    Untracked:  code/Calibration-extraction-AndyG.R
+    Untracked:  code/SCI.R
+    Untracked:  code/horohoro-lidar-metrics.R
     Untracked:  data/RecceSurvey Data summary Hunuas Watercare.xlsx
     Untracked:  data/allmetrics.csv
     Untracked:  data/field-data.csv
+    Untracked:  docs/figure/als-metrics.Rmd/
     Untracked:  out/
+
+Unstaged changes:
+    Modified:   .gitignore
 
 </code></pre>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes. </details>
@@ -386,6 +394,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+Rmd
+</td>
+<td style="text-align:left;">
+<a href="https://github.com/jonathandash/understorey/blob/7505f73a09b63653bb2a6859f75b89c4f4d7ee14/analysis/initial-analysis.Rmd" target="_blank">7505f73</a>
+</td>
+<td style="text-align:left;">
+jonathandash
+</td>
+<td style="text-align:left;">
+2018-08-28
+</td>
+<td style="text-align:left;">
+Update to include ALS analysis
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+html
+</td>
+<td style="text-align:left;">
+<a href="https://cdn.rawgit.com/jonathandash/understorey/d3da9af3a8e4b33d4d1c69a3b11a6a577bda5652/docs/initial-analysis.html" target="_blank">d3da9af</a>
+</td>
+<td style="text-align:left;">
+jonathandash
+</td>
+<td style="text-align:left;">
+2018-08-27
+</td>
+<td style="text-align:left;">
+Build site.
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 Rmd
@@ -514,56 +556,15 @@ Add my first analysis
 <h2>Introduction</h2>
 <p>This analysis is designed to investigate the ALS metrics for the field plots and identify important predictors. Once these are produced we generate useful metrics and produce initial maps.</p>
 <pre class="r"><code>#### Setup project ####
-library(here)</code></pre>
-<pre><code>here() starts at E:/understorey</code></pre>
-<pre class="r"><code>library(tidyverse)</code></pre>
-<pre><code>-- Attaching packages ------------------------------------------------------------------------------------------ tidyverse 1.2.1 --</code></pre>
-<pre><code>v ggplot2 3.0.0     v purrr   0.2.5
-v tibble  1.4.2     v dplyr   0.7.6
-v tidyr   0.8.1     v stringr 1.3.1
-v readr   1.1.1     v forcats 0.3.0</code></pre>
-<pre><code>-- Conflicts --------------------------------------------------------------------------------------------- tidyverse_conflicts() --
-x dplyr::filter() masks stats::filter()
-x dplyr::lag()    masks stats::lag()</code></pre>
-<pre class="r"><code>library(corrplot)</code></pre>
-<pre><code>corrplot 0.84 loaded</code></pre>
-<pre class="r"><code>library(randomForest)</code></pre>
-<pre><code>randomForest 4.6-14</code></pre>
-<pre><code>Type rfNews() to see new features/changes/bug fixes.</code></pre>
-<pre><code>
-Attaching package: &#39;randomForest&#39;</code></pre>
-<pre><code>The following object is masked from &#39;package:dplyr&#39;:
+library(here)
+library(tidyverse)
+library(corrplot)
+library(randomForest)
+library(caret)
+library(party)
+library(raster)
 
-    combine</code></pre>
-<pre><code>The following object is masked from &#39;package:ggplot2&#39;:
-
-    margin</code></pre>
-<pre class="r"><code>library(caret)</code></pre>
-<pre><code>Loading required package: lattice</code></pre>
-<pre><code>
-Attaching package: &#39;caret&#39;</code></pre>
-<pre><code>The following object is masked from &#39;package:purrr&#39;:
-
-    lift</code></pre>
-<pre class="r"><code>library(party)</code></pre>
-<pre><code>Loading required package: grid</code></pre>
-<pre><code>Loading required package: mvtnorm</code></pre>
-<pre><code>Loading required package: modeltools</code></pre>
-<pre><code>Loading required package: stats4</code></pre>
-<pre><code>Loading required package: strucchange</code></pre>
-<pre><code>Loading required package: zoo</code></pre>
-<pre><code>
-Attaching package: &#39;zoo&#39;</code></pre>
-<pre><code>The following objects are masked from &#39;package:base&#39;:
-
-    as.Date, as.Date.numeric</code></pre>
-<pre><code>Loading required package: sandwich</code></pre>
-<pre><code>
-Attaching package: &#39;strucchange&#39;</code></pre>
-<pre><code>The following object is masked from &#39;package:stringr&#39;:
-
-    boundary</code></pre>
-<pre class="r"><code>#### Read data and merge ####
+#### Read data and merge ####
 
 # Read field data
 f.df&lt;-read.csv(here(&#39;data&#39;, &#39;field-data.csv&#39;))
@@ -571,270 +572,27 @@ f.df&lt;-read.csv(here(&#39;data&#39;, &#39;field-data.csv&#39;))
 # Read Grant&#39;s lidar metrics
 als.df&lt;-read.csv(here(&#39;data&#39;, &#39;allmetrics.csv&#39;))
 
-glimpse(als.df)</code></pre>
-<pre><code>Observations: 71
-Variables: 80
-$ PlotID          &lt;int&gt; 1, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 2, ...
-$ file_name       &lt;fct&gt; 1.las, 10.las, 11.las, 12.las, 13.las, 14.las,...
-$ avg             &lt;dbl&gt; 15.564, 12.678, 11.490, 8.546, 12.533, 12.615,...
-$ qav             &lt;dbl&gt; 310.218, 216.872, 163.483, 113.665, 220.776, 2...
-$ std             &lt;dbl&gt; 8.246, 7.493, 5.609, 6.375, 7.982, 6.974, 5.05...
-$ ske             &lt;dbl&gt; -0.467, -0.618, -0.138, 0.120, -0.031, -0.289,...
-$ kur             &lt;dbl&gt; 2.206, 1.901, 2.324, 1.527, 1.577, 1.853, 2.17...
-$ p05             &lt;dbl&gt; 0.000, 0.000, 0.186, 0.148, 0.282, 0.072, 0.08...
-$ p10             &lt;dbl&gt; 1.490, 0.189, 4.793, 0.822, 2.499, 2.401, 2.67...
-$ p25             &lt;dbl&gt; 9.754, 5.870, 7.496, 2.384, 4.433, 6.642, 6.58...
-$ p50             &lt;dbl&gt; 17.256, 15.733, 11.991, 9.627, 13.961, 14.245,...
-$ p75             &lt;dbl&gt; 21.948, 18.404, 15.756, 14.154, 19.597, 18.540...
-$ p90             &lt;dbl&gt; 25.491, 20.479, 18.852, 17.046, 22.955, 20.996...
-$ p99             &lt;dbl&gt; 29.143, 23.236, 22.384, 20.308, 25.820, 23.842...
-$ b05             &lt;dbl&gt; 10.1, 17.4, 5.8, 13.0, 7.3, 8.9, 8.6, 9.8, 10....
-$ b10             &lt;dbl&gt; 11.6, 19.7, 6.5, 23.3, 10.7, 10.1, 9.2, 12.7, ...
-$ b25             &lt;dbl&gt; 21.8, 27.0, 15.6, 44.3, 32.2, 24.1, 16.5, 24.1...
-$ b50             &lt;dbl&gt; 42.0, 37.3, 50.3, 57.6, 49.1, 45.8, 52.6, 34.2...
-$ b75             &lt;dbl&gt; 81.0, 83.5, 87.1, 86.4, 78.2, 82.3, 84.5, 75.8...
-$ b90             &lt;dbl&gt; 96.9, 99.0, 97.9, 98.5, 94.9, 98.6, 98.7, 97.3...
-$ c00             &lt;int&gt; 63, 350, 51, 1025, 201, 91, 88, 98, 380, 226, ...
-$ c01             &lt;int&gt; 375, 245, 263, 1461, 1107, 417, 528, 500, 1306...
-$ c02             &lt;int&gt; 1399, 546, 2193, 1148, 1085, 2116, 3484, 659, ...
-$ c03             &lt;int&gt; 5116, 3129, 2807, 2559, 2869, 4198, 2897, 3981...
-$ d00             &lt;dbl&gt; 0.7, 7.2, 0.9, 15.4, 3.5, 1.2, 1.2, 1.7, 4.0, ...
-$ d01             &lt;dbl&gt; 4.2, 5.1, 4.7, 21.9, 19.3, 5.6, 6.9, 8.4, 13.9...
-$ d02             &lt;dbl&gt; 15.8, 11.3, 39.0, 17.2, 18.9, 28.4, 45.8, 11.1...
-$ d03             &lt;dbl&gt; 57.8, 64.8, 49.9, 38.4, 50.0, 56.3, 38.1, 67.1...
-$ int_max         &lt;int&gt; 221, 215, 235, 233, 251, 207, 198, 182, 165, 2...
-$ int_avg         &lt;int&gt; 22, 33, 32, 34, 36, 19, 38, 20, 23, 37, 30, 35...
-$ int_qav         &lt;int&gt; 1234, 2283, 2950, 2677, 3671, 1038, 3230, 998,...
-$ int_std         &lt;dbl&gt; 26.98, 34.38, 43.29, 38.21, 48.45, 25.67, 41.5...
-$ int_ske         &lt;dbl&gt; 2.21, 1.25, 2.12, 1.57, 1.98, 2.43, 1.29, 1.66...
-$ int_kur         &lt;dbl&gt; 9.19, 4.19, 7.18, 5.23, 6.51, 10.19, 3.84, 5.6...
-$ int_p05         &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1...
-$ int_p10         &lt;int&gt; 1, 2, 2, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 2, 1, 1...
-$ int_p25         &lt;int&gt; 4, 6, 5, 6, 5, 3, 5, 3, 4, 6, 4, 5, 6, 6, 5, 4...
-$ int_p50         &lt;int&gt; 12, 19, 15, 20, 15, 9, 22, 11, 12, 19, 15, 16,...
-$ int_p75         &lt;int&gt; 32, 55, 43, 54, 49, 26, 62, 32, 35, 54, 47, 52...
-$ int_p90         &lt;int&gt; 59, 86, 90, 90, 103, 53, 102, 56, 67, 110, 79,...
-$ int_p99         &lt;int&gt; 129, 129, 195, 160, 207, 125, 162, 94, 114, 16...
-$ dns             &lt;dbl&gt; 89.6, 81.3, 93.6, 77.6, 91.3, 90.3, 90.8, 89.2...
-$ cov_03          &lt;dbl&gt; 100.0, 98.0, 100.0, 99.8, 100.0, 100.0, 100.0,...
-$ cov_2           &lt;dbl&gt; 100.0, 96.3, 100.0, 94.7, 100.0, 100.0, 100.0,...
-$ cov_5           &lt;dbl&gt; 100.0, 95.3, 99.9, 78.2, 97.9, 99.8, 99.9, 99....
-$ cov_12          &lt;dbl&gt; 97.9, 92.8, 82.6, 65.0, 79.0, 92.2, 60.8, 98.4...
-$ cov_25          &lt;dbl&gt; 29.8, 0.2, 0.0, 0.0, 9.2, 0.6, 0.0, 7.9, 0.6, ...
-$ VCI_h0p3        &lt;dbl&gt; 0.9275530, 0.8934686, 0.9285598, 0.8879837, 0....
-$ VCI_h12         &lt;dbl&gt; 0.5923431, 0.5968369, 0.6289026, 0.5959740, 0....
-$ VCI_h2          &lt;dbl&gt; 0.9324653, 0.8567565, 0.8986397, 0.8209309, 0....
-$ VCI_h5          &lt;dbl&gt; 0.8699780, 0.8060600, 0.8229164, 0.7066366, 0....
-$ SCI_0.3         &lt;dbl&gt; 0.17929876, 0.17053364, 0.09058719, 0.09972299...
-$ SCI_12          &lt;dbl&gt; 0.4014277, 0.3732599, 0.5559162, 0.5991903, 0....
-$ SCI_2           &lt;dbl&gt; 0.1900063, 0.2645012, 0.1015049, 0.3106755, 0....
-$ SCI_25          &lt;dbl&gt; 0.8335083, 0.9988399, 1.0000000, 1.0000000, 0....
-$ SCI_5           &lt;dbl&gt; 0.2477430, 0.3022042, 0.1531425, 0.5173663, 0....
-$ cc_above_0.3m   &lt;dbl&gt; 1.0000000, 1.0000000, 1.0000000, 1.0000000, 1....
-$ cc_above_12m    &lt;dbl&gt; 0.9834711, 1.0000000, 0.9752066, 0.8429752, 0....
-$ cc_above_25m    &lt;dbl&gt; 0.545454545, 0.008264463, 0.000000000, 0.00000...
-$ cc_above_2m     &lt;dbl&gt; 1.0000000, 1.0000000, 1.0000000, 0.9917355, 1....
-$ cc_above_5m     &lt;dbl&gt; 1.0000000, 1.0000000, 1.0000000, 0.9090909, 1....
-$ LPI             &lt;dbl&gt; 0.20740741, 0.15869312, 0.08711007, 0.08496177...
-$ b90f_b80f       &lt;dbl&gt; 20.864198, 16.716958, 12.477928, 14.869565, 18...
-$ medint_fc       &lt;dbl&gt; 18.0, 25.0, 14.0, 20.5, 28.0, 13.0, 27.0, 12.0...
-$ p90_b90af       &lt;dbl&gt; 151.32685, 12.31858, 78.52160, 32.37198, 209.4...
-$ ln_mfp          &lt;dbl&gt; 1.3131132, 1.2732252, 1.1330420, 1.1107603, 1....
-$ mfp             &lt;dbl&gt; 5.265299, 5.325736, 3.914086, 4.187118, 5.5554...
-$ PccFrom_12_m    &lt;dbl&gt; 0.7364618, 0.7296517, 0.4750451, 0.3621391, 0....
-$ PccFrom_25_m    &lt;dbl&gt; 0.108773254, 0.000569963, 0.000000000, 0.00000...
-$ PccFrom_2_m     &lt;dbl&gt; 0.9921802, 0.9022453, 0.9906828, 0.8130614, 0....
-$ PccFrom_5_m     &lt;dbl&gt; 0.9392384, 0.8513985, 0.9286735, 0.5302826, 0....
-$ H_SVM_D_med_ar  &lt;dbl&gt; 26.6200, 25.5965, 15.7640, 15.0300, 25.5990, 2...
-$ H_SVM_D_med_fr  &lt;dbl&gt; 26.8650, 25.5965, 16.5200, 15.6840, 25.6540, 2...
-$ H_SVM_D_med_fsr &lt;dbl&gt; 26.6920, 25.5965, 16.0370, 15.2680, 25.5990, 2...
-$ H_SVM_med_ar    &lt;dbl&gt; 18.7350, 17.6340, 15.7640, 15.0300, 18.9560, 1...
-$ H_SVM_med_fr    &lt;dbl&gt; 20.0730, 18.6610, 16.5200, 15.6840, 20.1860, 1...
-$ H_SVM_med_fsr   &lt;dbl&gt; 19.2885, 17.9580, 16.0370, 15.2680, 19.5900, 1...
-$ D0_ENL          &lt;int&gt; 31, 26, 25, 22, 27, 27, 21, 28, 26, 21, 25, 25...
-$ D1_ENL          &lt;dbl&gt; 0.011059766, 0.000500655, 0.009321956, 0.00233...
-$ D2_ENL          &lt;dbl&gt; 0.02494430, 0.02396033, 0.03051672, 0.03017616...</code></pre>
-<pre class="r"><code>glimpse(f.df)</code></pre>
-<pre><code>Observations: 72
-Variables: 30
-$ plot                &lt;fct&gt; RR1 , RR2, RR3, RR4, RR5, RR6, RR7, RR8, R...
-$ altitude            &lt;int&gt; 451, 430, 442, 408, 392, 399, 398, 426, 45...
-$ aspect              &lt;int&gt; 0, 0, 110, 270, 0, 200, 320, 294, 80, 0, 1...
-$ slope               &lt;int&gt; 0, 0, 8, 6, 0, 7, 10, 14, 11, 0, 13, 9, 12...
-$ pineage             &lt;int&gt; 25, 17, 25, 17, 25, 25, 25, 25, 18, 17, 18...
-$ pinestems           &lt;int&gt; 6, 2, 3, 3, 3, 2, 2, 5, 2, 5, 4, 4, 4, 3, ...
-$ pineATH             &lt;int&gt; 36, 28, 25, 25, 30, 38, 34, 36, 26, 25, 23...
-$ pineCC              &lt;int&gt; 60, 50, 30, 60, 65, 65, 70, 85, 60, 60, 40...
-$ nativeATH           &lt;dbl&gt; 6.0, 4.0, 5.0, 2.0, 4.0, 4.0, 4.0, 6.0, 5....
-$ nativeCC            &lt;int&gt; 90, 75, 75, 5, 85, 75, 90, 90, 95, 35, 90,...
-$ treefernstems       &lt;int&gt; 3, 4, 6, 0, 1, 6, 12, 1, 5, 2, 11, 1, 16, ...
-$ nativestems         &lt;int&gt; 30, 20, 23, 4, 55, 15, 20, 24, 12, 12, 11,...
-$ totalnativestems    &lt;int&gt; 33, 24, 29, 4, 56, 21, 32, 25, 17, 14, 22,...
-$ nativestemspecies   &lt;int&gt; 6, 5, 6, 2, 9, 7, 7, 6, 5, 7, 7, 9, 5, 7, ...
-$ nativespecies       &lt;int&gt; 6, 7, 9, 5, 13, 8, 7, 8, 8, 12, 9, 13, 9, ...
-$ nativestemsperha    &lt;int&gt; 3300, 2400, 2900, 400, 5600, 2100, 3200, 2...
-$ total.coverT1       &lt;int&gt; 55, 50, 30, 20, 60, 40, 55, 85, 40, 15, 25...
-$ total.coverT2       &lt;int&gt; 50, 50, 30, 60, 60, 65, 70, 5, 60, 60, 40,...
-$ total.coverT3       &lt;int&gt; 60, 25, 45, 5, 10, 10, 20, 75, 75, 20, 60,...
-$ total.coverT4       &lt;int&gt; 30, 60, 45, 5, 65, 60, 77, 85, 85, 27, 70,...
-$ total.coverT5       &lt;int&gt; 10, 30, 10, 85, 30, 10, 25, 35, 25, 55, 19...
-$ distancetobignative &lt;int&gt; 530, 100, 290, 470, 250, 115, 195, 150, 23...
-$ regime              &lt;fct&gt; clearwood, clearwood, clearwood, clearwood...
-$ TSPHA               &lt;int&gt; 335, 329, 335, 332, 335, 335, 335, 335, 32...
-$ nativeT2            &lt;int&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ...
-$ nativeT3            &lt;int&gt; 35, 20, 45, 1, 10, 10, 20, 75, 78, 15, 55,...
-$ nativeT4            &lt;int&gt; 42, 63, 48, 4, 68, 60, 75, 81, 90, 25, 70,...
-$ nativeT5            &lt;int&gt; 11, 39, 12, 15, 49, 10, 24, 35, 23, 44, 20...
-$ weedT4              &lt;int&gt; 0, 0, 0, 1, 0, 0, 2, 5, 0, 2, 0, 1, 0, 0, ...
-$ weedT5              &lt;int&gt; 0, 1, 0, 80, 1, 3, 1, 1, 2, 21, 0, 6, 0, 0...</code></pre>
-<pre class="r"><code># looks like plot names are not consistent
+#glimpse(als.df)
+#glimpse(f.df)
+
+# looks like plot names are not consistent
 #head(als.df)
 #head(f.df)
 
-# Check with GP that these als lines are logical... If so proceed bying making a linking identifier.
+# Check with GP that these als linaes are logical... If so proceed bying making a linking identifier.
 # GP confirmed on Slack message
 
 # merge datasets
 als.df$identifier&lt;-paste(&#39;RR&#39;, als.df$PlotID, sep=&#39;&#39;) # Checked with GP and seems reasonable
 ref&lt;-merge(f.df, als.df, by.x = &#39;plot&#39;, by.y = &#39;identifier&#39;)
 
-#str(ref)
-
-#### review correlations ####
+#str(ref)</code></pre>
+<pre class="r"><code>#### review correlations ####
 
 # Make a logic check plot the top height against ALS metrics
 
 plot(pineATH ~ p99, data = ref, xlim = c(5,40), ylim = c(5,40))</code></pre>
-<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-1-1.png" width="672" style="display: block; margin: auto;" /></p>
-<details> <summary><em>Expand here to see past versions of unnamed-chunk-1-1.png:</em></summary>
-<table style="border-collapse:separate; border-spacing:5px;">
-<thead>
-<tr>
-<th style="text-align:left;">
-Version
-</th>
-<th style="text-align:left;">
-Author
-</th>
-<th style="text-align:left;">
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-<a href="https://github.com/jonathandash/understorey/blob/02eb0b097eb18db74ec01a2f696cde3d63f77a80/docs/figure/initial-analysis.Rmd/unnamed-chunk-1-1.png" target="_blank">02eb0b0</a>
-</td>
-<td style="text-align:left;">
-jonathandash
-</td>
-<td style="text-align:left;">
-2018-08-27
-</td>
-</tr>
-</tbody>
-</table>
-<p></details></p>
-<pre class="r"><code># doesn&#39;t look great but  they may not know how to measure and calculate top height
-
-plot(pineage~ p99, data = ref, xlim = c(5,40), ylim = c(5,40))</code></pre>
-<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-1-2.png" width="672" style="display: block; margin: auto;" /></p>
-<details> <summary><em>Expand here to see past versions of unnamed-chunk-1-2.png:</em></summary>
-<table style="border-collapse:separate; border-spacing:5px;">
-<thead>
-<tr>
-<th style="text-align:left;">
-Version
-</th>
-<th style="text-align:left;">
-Author
-</th>
-<th style="text-align:left;">
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-<a href="https://github.com/jonathandash/understorey/blob/02eb0b097eb18db74ec01a2f696cde3d63f77a80/docs/figure/initial-analysis.Rmd/unnamed-chunk-1-2.png" target="_blank">02eb0b0</a>
-</td>
-<td style="text-align:left;">
-jonathandash
-</td>
-<td style="text-align:left;">
-2018-08-27
-</td>
-</tr>
-</tbody>
-</table>
-<p></details></p>
-<pre class="r"><code># limited variability within a big range of ages... may need review
-
-preds&lt;-ref[ , 33:110] # define predictors
-
-stand.preds&lt;-ref[ , c(2,3,4,5,6,7,8)] # define predictors related to plantation stand structure. This could 
-# allow us to test the hypothesis that ALS metrics are no better than stand structure for prediction.</code></pre>
-<p>Check correlation matrix for the stand variables</p>
-<pre class="r"><code># Plot correlations for stand variables
-#png(here(&#39;out&#39;, &#39;cor-matrix-stand-mets.png&#39;), width = 20, height = 20, 
-#         units = &quot;cm&quot;, res = 500, pointsize = 12,
-#         type = &quot;cairo&quot;)
-M&lt;-cor(ref[ ,c(9,10,11,12,14,15,  2:8)])
-corrplot.mixed(M, upper = &quot;circle&quot;, lower = &quot;number&quot;,
-               tl.pos = &quot;lt&quot;, tl.col = &quot;black&quot;, tl.offset=1) # too many variables not useful</code></pre>
-<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-2-1.png" width="672" style="display: block; margin: auto;" /></p>
-<details> <summary><em>Expand here to see past versions of unnamed-chunk-2-1.png:</em></summary>
-<table style="border-collapse:separate; border-spacing:5px;">
-<thead>
-<tr>
-<th style="text-align:left;">
-Version
-</th>
-<th style="text-align:left;">
-Author
-</th>
-<th style="text-align:left;">
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-<a href="https://github.com/jonathandash/understorey/blob/02eb0b097eb18db74ec01a2f696cde3d63f77a80/docs/figure/initial-analysis.Rmd/unnamed-chunk-2-1.png" target="_blank">02eb0b0</a>
-</td>
-<td style="text-align:left;">
-jonathandash
-</td>
-<td style="text-align:left;">
-2018-08-27
-</td>
-</tr>
-</tbody>
-</table>
-<p></details></p>
-<pre class="r"><code>#dev.off()
-
-png(here(&#39;out&#39;, &#39;cor-matrix-stand-mets.png&#39;), width = 20, height = 20, 
-         units = &quot;cm&quot;, res = 500, pointsize = 12,
-         type = &quot;cairo&quot;)
-M&lt;-cor(ref[ ,c(9,10,11,12,14,15,  2:8)])
-corrplot.mixed(M, upper = &quot;circle&quot;, lower = &quot;number&quot;,
-               tl.pos = &quot;lt&quot;, tl.col = &quot;black&quot;, tl.offset=1) 
-dev.off()</code></pre>
-<pre><code>png 
-  2 </code></pre>
-<p>Plot correlation matrix for height percentiles</p>
-<pre class="r"><code># Plot correlations for height percentiles
-#png(here(&#39;out&#39;, &#39;cor-matrix-ht-pct.png&#39;), width = 25, height = 25, 
-#    units = &quot;cm&quot;, res = 500, pointsize = 12,
-#    type = &quot;cairo&quot;)
-M&lt;-cor(ref[ ,c(9,10,11,12,14,15,  33:44)])
-corrplot.mixed(M, upper = &quot;circle&quot;, lower = &quot;number&quot;,
-               tl.pos = &quot;lt&quot;, tl.col = &quot;black&quot;, tl.offset=1) # too many variables not useful</code></pre>
-<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-3-1.png" width="1152" style="display: block; margin: auto;" /></p>
 <details> <summary><em>Expand here to see past versions of unnamed-chunk-3-1.png:</em></summary>
 <table style="border-collapse:separate; border-spacing:5px;">
 <thead>
@@ -865,25 +623,25 @@ jonathandash
 </tbody>
 </table>
 <p></details></p>
-<pre class="r"><code>#dev.off()
+<pre class="r"><code>## doesn&#39;t look great but  they may not know how to measure and calculate top height
 
-png(here(&#39;out&#39;, &#39;cor-matrix-ht-pct.png&#39;), width = 25, height = 25, 
-    units = &quot;cm&quot;, res = 500, pointsize = 12,
-    type = &quot;cairo&quot;)
-M&lt;-cor(ref[ ,c(9,10,11,12,14,15,  33:44)])
-corrplot.mixed(M, upper = &quot;circle&quot;, lower = &quot;number&quot;,
-               tl.pos = &quot;lt&quot;, tl.col = &quot;black&quot;, tl.offset=1) # too many variables not useful
-dev.off()</code></pre>
-<pre><code>png 
-  2 </code></pre>
-<pre class="r"><code># Plot correlations for bincentiles
-#png(here(&#39;out&#39;, &#39;cor-matrix-ht-binc.png&#39;), width = 20, height = 20, 
-#    units = &quot;cm&quot;, res = 500, pointsize = 12,
-#    type = &quot;cairo&quot;)
-M&lt;-cor(ref[ ,c(9,10,11,12,14,15,  45:50)])
+plot(pineage~ p99, data = ref, xlim = c(5,40), ylim = c(5,40))</code></pre>
+<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-3-2.png" width="1152" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># limited variability within a big range of ages... may need review
+
+preds&lt;-ref[ , 33:110] # define predictors
+
+stand.preds&lt;-ref[ , c(2,3,4,5,6,7,8)] # define predictors related to plantation stand structure. This could 
+# allow us to test the hypothesis that ALS metrics are no better than stand structure for prediction.</code></pre>
+<p>Check correlation matrix for the stand variables</p>
+<pre class="r"><code># Plot correlations for stand variables
+#png(here(&#39;out&#39;, &#39;cor-matrix-stand-mets.png&#39;), width = 20, height = 20, 
+#         units = &quot;cm&quot;, res = 500, pointsize = 12,
+#         type = &quot;cairo&quot;)
+M&lt;-cor(ref[ ,c(9,10,11,12,14,15,  2:8)])
 corrplot.mixed(M, upper = &quot;circle&quot;, lower = &quot;number&quot;,
                tl.pos = &quot;lt&quot;, tl.col = &quot;black&quot;, tl.offset=1) # too many variables not useful</code></pre>
-<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-4-1.png" width="1152" style="display: block; margin: auto;" /></p>
 <details> <summary><em>Expand here to see past versions of unnamed-chunk-4-1.png:</em></summary>
 <table style="border-collapse:separate; border-spacing:5px;">
 <thead>
@@ -916,25 +674,24 @@ jonathandash
 <p></details></p>
 <pre class="r"><code>#dev.off()
 
-# Plot correlations for bincentiles
-png(here(&#39;out&#39;, &#39;cor-matrix-ht-binc.png&#39;), width = 20, height = 20, 
-    units = &quot;cm&quot;, res = 500, pointsize = 12,
-    type = &quot;cairo&quot;)
-M&lt;-cor(ref[ ,c(9,10,11,12,14,15,  45:50)])
+png(here(&#39;out&#39;, &#39;cor-matrix-stand-mets.png&#39;), width = 20, height = 20, 
+         units = &quot;cm&quot;, res = 500, pointsize = 12,
+         type = &quot;cairo&quot;)
+M&lt;-cor(ref[ ,c(9,10,11,12,14,15,  2:8)])
 corrplot.mixed(M, upper = &quot;circle&quot;, lower = &quot;number&quot;,
-               tl.pos = &quot;lt&quot;, tl.col = &quot;black&quot;, tl.offset=1) # too many variables not useful
+               tl.pos = &quot;lt&quot;, tl.col = &quot;black&quot;, tl.offset=1) 
 dev.off()</code></pre>
 <pre><code>png 
   2 </code></pre>
-<p>Correlation matrix for height deciles</p>
-<pre class="r"><code># Plot correlations for deciles
-#png(here(&#39;out&#39;, &#39;cor-matrix-ht-deciles.png&#39;), width = 20, height = 20, 
+<p>Plot correlation matrix for height percentiles</p>
+<pre class="r"><code># Plot correlations for height percentiles
+#png(here(&#39;out&#39;, &#39;cor-matrix-ht-pct.png&#39;), width = 25, height = 25, 
 #    units = &quot;cm&quot;, res = 500, pointsize = 12,
 #    type = &quot;cairo&quot;)
-M&lt;-cor(ref[ ,c(9,10,11,12,14,15,  51:57)])
+M&lt;-cor(ref[ ,c(9,10,11,12,14,15,  33:44)])
 corrplot.mixed(M, upper = &quot;circle&quot;, lower = &quot;number&quot;,
                tl.pos = &quot;lt&quot;, tl.col = &quot;black&quot;, tl.offset=1) # too many variables not useful</code></pre>
-<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-5-1.png" width="1152" style="display: block; margin: auto;" /></p>
 <details> <summary><em>Expand here to see past versions of unnamed-chunk-5-1.png:</em></summary>
 <table style="border-collapse:separate; border-spacing:5px;">
 <thead>
@@ -967,24 +724,23 @@ jonathandash
 <p></details></p>
 <pre class="r"><code>#dev.off()
 
-png(here(&#39;out&#39;, &#39;cor-matrix-ht-deciles.png&#39;), width = 20, height = 20, 
+png(here(&#39;out&#39;, &#39;cor-matrix-ht-pct.png&#39;), width = 25, height = 25, 
     units = &quot;cm&quot;, res = 500, pointsize = 12,
     type = &quot;cairo&quot;)
-M&lt;-cor(ref[ ,c(9,10,11,12,14,15,  51:57)])
+M&lt;-cor(ref[ ,c(9,10,11,12,14,15,  33:44)])
 corrplot.mixed(M, upper = &quot;circle&quot;, lower = &quot;number&quot;,
                tl.pos = &quot;lt&quot;, tl.col = &quot;black&quot;, tl.offset=1) # too many variables not useful
 dev.off()</code></pre>
 <pre><code>png 
   2 </code></pre>
-<p>Correlation matrix for cov - voxels</p>
-<pre class="r"><code># Plot correlations for voxels_cov
-#png(here(&#39;out&#39;, &#39;cor-matrix-vox_cov.png&#39;), width = 20, height = 20, 
+<pre class="r"><code># Plot correlations for bincentiles
+#png(here(&#39;out&#39;, &#39;cor-matrix-ht-binc.png&#39;), width = 20, height = 20, 
 #    units = &quot;cm&quot;, res = 500, pointsize = 12,
 #    type = &quot;cairo&quot;)
-M&lt;-cor(ref[ ,c(9,10,11,12,14,15,  72:77)])
+M&lt;-cor(ref[ ,c(9,10,11,12,14,15,  45:50)])
 corrplot.mixed(M, upper = &quot;circle&quot;, lower = &quot;number&quot;,
                tl.pos = &quot;lt&quot;, tl.col = &quot;black&quot;, tl.offset=1) # too many variables not useful</code></pre>
-<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-6-1.png" width="1152" style="display: block; margin: auto;" /></p>
 <details> <summary><em>Expand here to see past versions of unnamed-chunk-6-1.png:</em></summary>
 <table style="border-collapse:separate; border-spacing:5px;">
 <thead>
@@ -1017,24 +773,25 @@ jonathandash
 <p></details></p>
 <pre class="r"><code>#dev.off()
 
-png(here(&#39;out&#39;, &#39;cor-matrix-vox_cov.png&#39;), width = 20, height = 20, 
+# Plot correlations for bincentiles
+png(here(&#39;out&#39;, &#39;cor-matrix-ht-binc.png&#39;), width = 20, height = 20, 
     units = &quot;cm&quot;, res = 500, pointsize = 12,
     type = &quot;cairo&quot;)
-M&lt;-cor(ref[ ,c(9,10,11,12,14,15,  72:77)])
+M&lt;-cor(ref[ ,c(9,10,11,12,14,15,  45:50)])
 corrplot.mixed(M, upper = &quot;circle&quot;, lower = &quot;number&quot;,
                tl.pos = &quot;lt&quot;, tl.col = &quot;black&quot;, tl.offset=1) # too many variables not useful
 dev.off()</code></pre>
 <pre><code>png 
   2 </code></pre>
-<p>Correlation matric for VCI - SCI voxel metrics</p>
-<pre class="r"><code># Plot correlations for voxels_VCI_SCI
-#png(here(&#39;out&#39;, &#39;cor-matrix-vox_VCI_SCI.png&#39;), width = 20, height = 20, 
+<p>Correlation matrix for height deciles</p>
+<pre class="r"><code># Plot correlations for deciles
+#png(here(&#39;out&#39;, &#39;cor-matrix-ht-deciles.png&#39;), width = 20, height = 20, 
 #    units = &quot;cm&quot;, res = 500, pointsize = 12,
 #    type = &quot;cairo&quot;)
-M&lt;-cor(ref[ ,c(9,10,11,12,14,15,  78:86)])
+M&lt;-cor(ref[ ,c(9,10,11,12,14,15,  51:57)])
 corrplot.mixed(M, upper = &quot;circle&quot;, lower = &quot;number&quot;,
                tl.pos = &quot;lt&quot;, tl.col = &quot;black&quot;, tl.offset=1) # too many variables not useful</code></pre>
-<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-7-1.png" width="1152" style="display: block; margin: auto;" /></p>
 <details> <summary><em>Expand here to see past versions of unnamed-chunk-7-1.png:</em></summary>
 <table style="border-collapse:separate; border-spacing:5px;">
 <thead>
@@ -1067,24 +824,24 @@ jonathandash
 <p></details></p>
 <pre class="r"><code>#dev.off()
 
-png(here(&#39;out&#39;, &#39;cor-matrix-vox_VCI_SCI.png&#39;), width = 20, height = 20, 
+png(here(&#39;out&#39;, &#39;cor-matrix-ht-deciles.png&#39;), width = 20, height = 20, 
     units = &quot;cm&quot;, res = 500, pointsize = 12,
     type = &quot;cairo&quot;)
-M&lt;-cor(ref[ ,c(9,10,11,12,14,15,  78:86)])
+M&lt;-cor(ref[ ,c(9,10,11,12,14,15,  51:57)])
 corrplot.mixed(M, upper = &quot;circle&quot;, lower = &quot;number&quot;,
                tl.pos = &quot;lt&quot;, tl.col = &quot;black&quot;, tl.offset=1) # too many variables not useful
 dev.off()</code></pre>
 <pre><code>png 
   2 </code></pre>
-<p>More correlations for Voxel metrics</p>
-<pre class="r"><code># Plot correlations for voxels_cc
-#png(here(&#39;out&#39;, &#39;cor-matrix-vox_cc.png&#39;), width = 25, height = 25, 
+<p>Correlation matrix for cov - voxels</p>
+<pre class="r"><code># Plot correlations for voxels_cov
+#png(here(&#39;out&#39;, &#39;cor-matrix-vox_cov.png&#39;), width = 20, height = 20, 
 #    units = &quot;cm&quot;, res = 500, pointsize = 12,
 #    type = &quot;cairo&quot;)
-M&lt;-cor(ref[ ,c(9,10,11,12,14,15,  87:97)])
+M&lt;-cor(ref[ ,c(9,10,11,12,14,15,  72:77)])
 corrplot.mixed(M, upper = &quot;circle&quot;, lower = &quot;number&quot;,
                tl.pos = &quot;lt&quot;, tl.col = &quot;black&quot;, tl.offset=1) # too many variables not useful</code></pre>
-<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-8-1.png" width="1152" style="display: block; margin: auto;" /></p>
 <details> <summary><em>Expand here to see past versions of unnamed-chunk-8-1.png:</em></summary>
 <table style="border-collapse:separate; border-spacing:5px;">
 <thead>
@@ -1117,25 +874,24 @@ jonathandash
 <p></details></p>
 <pre class="r"><code>#dev.off()
 
-# Plot correlations for voxels_cc
-png(here(&#39;out&#39;, &#39;cor-matrix-vox_cc.png&#39;), width = 25, height = 25, 
+png(here(&#39;out&#39;, &#39;cor-matrix-vox_cov.png&#39;), width = 20, height = 20, 
     units = &quot;cm&quot;, res = 500, pointsize = 12,
     type = &quot;cairo&quot;)
-M&lt;-cor(ref[ ,c(9,10,11,12,14,15,  87:97)])
+M&lt;-cor(ref[ ,c(9,10,11,12,14,15,  72:77)])
 corrplot.mixed(M, upper = &quot;circle&quot;, lower = &quot;number&quot;,
                tl.pos = &quot;lt&quot;, tl.col = &quot;black&quot;, tl.offset=1) # too many variables not useful
 dev.off()</code></pre>
 <pre><code>png 
   2 </code></pre>
-<p>More correlations for Voxel metrics</p>
-<pre class="r"><code># Plot correlations for voxels_cc
-#png(here(&#39;out&#39;, &#39;cor-matrix-vox_Pcc-end.png&#39;), width = 25, height = 25, 
+<p>Correlation matric for VCI - SCI voxel metrics</p>
+<pre class="r"><code># Plot correlations for voxels_VCI_SCI
+#png(here(&#39;out&#39;, &#39;cor-matrix-vox_VCI_SCI.png&#39;), width = 20, height = 20, 
 #    units = &quot;cm&quot;, res = 500, pointsize = 12,
 #    type = &quot;cairo&quot;)
-M&lt;-cor(ref[ ,c(9,10,11,12,14,15,  98:110)])
+M&lt;-cor(ref[ ,c(9,10,11,12,14,15,  78:86)])
 corrplot.mixed(M, upper = &quot;circle&quot;, lower = &quot;number&quot;,
                tl.pos = &quot;lt&quot;, tl.col = &quot;black&quot;, tl.offset=1) # too many variables not useful</code></pre>
-<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-9-1.png" width="1152" style="display: block; margin: auto;" /></p>
 <details> <summary><em>Expand here to see past versions of unnamed-chunk-9-1.png:</em></summary>
 <table style="border-collapse:separate; border-spacing:5px;">
 <thead>
@@ -1168,18 +924,24 @@ jonathandash
 <p></details></p>
 <pre class="r"><code>#dev.off()
 
-png(here(&#39;out&#39;, &#39;cor-matrix-vox_Pcc-end.png&#39;), width = 25, height = 25, 
+png(here(&#39;out&#39;, &#39;cor-matrix-vox_VCI_SCI.png&#39;), width = 20, height = 20, 
     units = &quot;cm&quot;, res = 500, pointsize = 12,
     type = &quot;cairo&quot;)
-M&lt;-cor(ref[ ,c(9,10,11,12,14,15,  98:110)])
+M&lt;-cor(ref[ ,c(9,10,11,12,14,15,  78:86)])
 corrplot.mixed(M, upper = &quot;circle&quot;, lower = &quot;number&quot;,
                tl.pos = &quot;lt&quot;, tl.col = &quot;black&quot;, tl.offset=1) # too many variables not useful
 dev.off()</code></pre>
 <pre><code>png 
   2 </code></pre>
-<p>Looks like a lot of the voxel metrics are correlated with themselves and some conventional metrics like bincentiles.</p>
-<pre class="r"><code>plot(b10~ SCI_2, data = ref) # looks like a lot of the voxel metrics are highly correlated with the lower</code></pre>
-<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>More correlations for Voxel metrics</p>
+<pre class="r"><code># Plot correlations for voxels_cc
+#png(here(&#39;out&#39;, &#39;cor-matrix-vox_cc.png&#39;), width = 25, height = 25, 
+#    units = &quot;cm&quot;, res = 500, pointsize = 12,
+#    type = &quot;cairo&quot;)
+M&lt;-cor(ref[ ,c(9,10,11,12,14,15,  87:97)])
+corrplot.mixed(M, upper = &quot;circle&quot;, lower = &quot;number&quot;,
+               tl.pos = &quot;lt&quot;, tl.col = &quot;black&quot;, tl.offset=1) # too many variables not useful</code></pre>
+<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-10-1.png" width="1152" style="display: block; margin: auto;" /></p>
 <details> <summary><em>Expand here to see past versions of unnamed-chunk-10-1.png:</em></summary>
 <table style="border-collapse:separate; border-spacing:5px;">
 <thead>
@@ -1210,6 +972,71 @@ jonathandash
 </tbody>
 </table>
 <p></details></p>
+<pre class="r"><code>#dev.off()
+
+# Plot correlations for voxels_cc
+png(here(&#39;out&#39;, &#39;cor-matrix-vox_cc.png&#39;), width = 25, height = 25, 
+    units = &quot;cm&quot;, res = 500, pointsize = 12,
+    type = &quot;cairo&quot;)
+M&lt;-cor(ref[ ,c(9,10,11,12,14,15,  87:97)])
+corrplot.mixed(M, upper = &quot;circle&quot;, lower = &quot;number&quot;,
+               tl.pos = &quot;lt&quot;, tl.col = &quot;black&quot;, tl.offset=1) # too many variables not useful
+dev.off()</code></pre>
+<pre><code>png 
+  2 </code></pre>
+<p>More correlations for Voxel metrics</p>
+<pre class="r"><code># Plot correlations for voxels_cc
+#png(here(&#39;out&#39;, &#39;cor-matrix-vox_Pcc-end.png&#39;), width = 25, height = 25, 
+#    units = &quot;cm&quot;, res = 500, pointsize = 12,
+#    type = &quot;cairo&quot;)
+M&lt;-cor(ref[ ,c(9,10,11,12,14,15,  98:110)])
+corrplot.mixed(M, upper = &quot;circle&quot;, lower = &quot;number&quot;,
+               tl.pos = &quot;lt&quot;, tl.col = &quot;black&quot;, tl.offset=1) # too many variables not useful</code></pre>
+<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-11-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>#dev.off()
+
+png(here(&#39;out&#39;, &#39;cor-matrix-vox_Pcc-end.png&#39;), width = 25, height = 25, 
+    units = &quot;cm&quot;, res = 500, pointsize = 12,
+    type = &quot;cairo&quot;)
+M&lt;-cor(ref[ ,c(9,10,11,12,14,15,  98:110)])
+corrplot.mixed(M, upper = &quot;circle&quot;, lower = &quot;number&quot;,
+               tl.pos = &quot;lt&quot;, tl.col = &quot;black&quot;, tl.offset=1) # too many variables not useful
+dev.off()</code></pre>
+<pre><code>png 
+  2 </code></pre>
+<p>Looks like a lot of the voxel metrics are correlated with themselves and some conventional metrics like bincentiles.</p>
+<pre class="r"><code>plot(b10~ SCI_2, data = ref) # looks like a lot of the voxel metrics are highly correlated with the lower</code></pre>
+<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-12-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of unnamed-chunk-12-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/jonathandash/understorey/blob/d209b07320bfc98ec99e1e3c43df218e1fee1bae/docs/figure/initial-analysis.Rmd/unnamed-chunk-12-1.png" target="_blank">d209b07</a>
+</td>
+<td style="text-align:left;">
+jonathandash
+</td>
+<td style="text-align:left;">
+2018-08-27
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
 <p>The response variables suggested by Richard Ewans in an e-mail response are listed below. Suggest these arereviewed by Thomas at a later date.</p>
 <ol style="list-style-type: decimal">
 <li>Average top height of native subcanopy - (Column I; native ATH)</li>
@@ -1219,9 +1046,6 @@ jonathandash
 <li>Number of different native woody species higher than 2m (including tree ferns) - (Column N; nativestemspecies)</li>
 <li>Total number of different native species - (Column O; nativespecies)</li>
 </ol>
-<pre class="r"><code># Specify response variables
-responses&lt;-ref[ c(9,10,11,12,14,15)]
-head(responses)</code></pre>
 <pre><code>  nativeATH nativeCC treefernstems nativestems nativestemspecies
 1         3       35             2          12                 7
 2         6       90            11          11                 7
@@ -1236,9 +1060,7 @@ head(responses)</code></pre>
 4             9
 5             9
 6            12</code></pre>
-<pre class="r"><code>nrow(responses)</code></pre>
 <pre><code>[1] 70</code></pre>
-<pre class="r"><code>nrow(preds)</code></pre>
 <pre><code>[1] 70</code></pre>
 <p>We used Caret for identifying important variables and feature selection. Do this for or the height of native subcanopy first.</p>
 <pre class="r"><code>#### Rank feature importance ####
@@ -1286,8 +1108,8 @@ PccFrom_5_m    0.006515
 H_SVM_D_med_ar 0.006512</code></pre>
 <pre class="r"><code># plot importance
 plot(importance)</code></pre>
-<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" /></p>
-<details> <summary><em>Expand here to see past versions of unnamed-chunk-12-1.png:</em></summary>
+<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-14-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of unnamed-chunk-14-1.png:</em></summary>
 <table style="border-collapse:separate; border-spacing:5px;">
 <thead>
 <tr>
@@ -1305,7 +1127,7 @@ Date
 <tbody>
 <tr>
 <td style="text-align:left;">
-<a href="https://github.com/jonathandash/understorey/blob/d209b07320bfc98ec99e1e3c43df218e1fee1bae/docs/figure/initial-analysis.Rmd/unnamed-chunk-12-1.png" target="_blank">d209b07</a>
+<a href="https://github.com/jonathandash/understorey/blob/d209b07320bfc98ec99e1e3c43df218e1fee1bae/docs/figure/initial-analysis.Rmd/unnamed-chunk-14-1.png" target="_blank">d209b07</a>
 </td>
 <td style="text-align:left;">
 jonathandash
@@ -1370,8 +1192,8 @@ predictors(results)</code></pre>
 [69] &quot;VCI_h5&quot;       </code></pre>
 <pre class="r"><code># plot the results
 plot(results, type=c(&quot;g&quot;, &quot;o&quot;))</code></pre>
-<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-12-2.png" width="672" style="display: block; margin: auto;" /></p>
-<details> <summary><em>Expand here to see past versions of unnamed-chunk-12-2.png:</em></summary>
+<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-14-2.png" width="1152" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of unnamed-chunk-14-2.png:</em></summary>
 <table style="border-collapse:separate; border-spacing:5px;">
 <thead>
 <tr>
@@ -1389,7 +1211,7 @@ Date
 <tbody>
 <tr>
 <td style="text-align:left;">
-<a href="https://github.com/jonathandash/understorey/blob/d209b07320bfc98ec99e1e3c43df218e1fee1bae/docs/figure/initial-analysis.Rmd/unnamed-chunk-12-2.png" target="_blank">d209b07</a>
+<a href="https://github.com/jonathandash/understorey/blob/d209b07320bfc98ec99e1e3c43df218e1fee1bae/docs/figure/initial-analysis.Rmd/unnamed-chunk-14-2.png" target="_blank">d209b07</a>
 </td>
 <td style="text-align:left;">
 jonathandash
@@ -1401,7 +1223,61 @@ jonathandash
 </tbody>
 </table>
 <p></details></p>
-<p>Now use the same approach for native canopy cover.</p>
+<p>Now use these predictors to model native understorey height by fitting a RF model with the selected predictors.</p>
+<pre><code>Random Forest 
+
+70 samples
+ 5 predictor
+
+No pre-processing
+Resampling: Bootstrapped (25 reps) 
+Summary of sample sizes: 70, 70, 70, 70, 70, 70, ... 
+Resampling results across tuning parameters:
+
+  mtry  splitrule   RMSE       Rsquared   MAE      
+  2     variance    0.9592306  0.5293575  0.7828987
+  2     extratrees  0.9588135  0.5368442  0.7734945
+  3     variance    0.9698744  0.5197214  0.7930516
+  3     extratrees  0.9487585  0.5439258  0.7675013
+  5     variance    0.9908640  0.5052240  0.8137463
+  5     extratrees  0.9357671  0.5539153  0.7588475
+
+Tuning parameter &#39;min.node.size&#39; was held constant at a value of 5
+RMSE was used to select the optimal model using the smallest value.
+The final values used for the model were mtry = 5, splitrule =
+ extratrees and min.node.size = 5.</code></pre>
+<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-15-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of unnamed-chunk-15-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/jonathandash/understorey/blob/d209b07320bfc98ec99e1e3c43df218e1fee1bae/docs/figure/initial-analysis.Rmd/unnamed-chunk-15-1.png" target="_blank">d209b07</a>
+</td>
+<td style="text-align:left;">
+jonathandash
+</td>
+<td style="text-align:left;">
+2018-08-27
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
+<p>Now use the same predictor variable selection approach for native canopy cover.</p>
 <pre class="r"><code>#nativeCC
 
 mod.df&lt;-cbind(responses$nativeCC, preds)
@@ -1425,31 +1301,31 @@ print(importance)</code></pre>
 
   only 20 most important variables shown (out of 78)
 
-                Overall
-b05            294.3250
-dns            133.6114
-SCI_2           38.0221
-ske             23.0615
-cov_03          12.9540
-cov_2            9.4504
-PccFrom_2_m      5.3428
-b10              3.7853
-c00              3.2326
-d00              2.1069
-kur              2.0090
-SCI_0.3          1.5250
-medint_fc        1.3220
-LPI              1.1821
-d01              1.1141
-H_SVM_D_med_ar   0.8191
-int_p50          0.5618
-VCI_h5           0.4376
-p10              0.3949
-b25              0.3109</code></pre>
+             Overall
+b05         172.2344
+dns         123.4701
+SCI_2       100.0653
+b10          30.8670
+ske          16.2886
+cov_03       11.0016
+SCI_0.3      10.9441
+cov_2         9.0788
+PccFrom_2_m   8.9216
+d00           6.8042
+p25           5.1325
+c00           3.2555
+c01           2.6032
+LPI           1.8042
+d01           1.5709
+kur           1.2173
+int_p99       0.7929
+b50           0.7171
+medint_fc     0.5067
+VCI_h5        0.4277</code></pre>
 <pre class="r"><code># plot importance
 plot(importance)</code></pre>
-<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-13-1.png" width="672" style="display: block; margin: auto;" /></p>
-<details> <summary><em>Expand here to see past versions of unnamed-chunk-13-1.png:</em></summary>
+<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-16-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of unnamed-chunk-16-1.png:</em></summary>
 <table style="border-collapse:separate; border-spacing:5px;">
 <thead>
 <tr>
@@ -1467,7 +1343,7 @@ Date
 <tbody>
 <tr>
 <td style="text-align:left;">
-<a href="https://github.com/jonathandash/understorey/blob/d209b07320bfc98ec99e1e3c43df218e1fee1bae/docs/figure/initial-analysis.Rmd/unnamed-chunk-13-1.png" target="_blank">d209b07</a>
+<a href="https://github.com/jonathandash/understorey/blob/d209b07320bfc98ec99e1e3c43df218e1fee1bae/docs/figure/initial-analysis.Rmd/unnamed-chunk-16-1.png" target="_blank">d209b07</a>
 </td>
 <td style="text-align:left;">
 jonathandash
@@ -1513,8 +1389,8 @@ predictors(results)</code></pre>
 <pre><code>[1] &quot;b05&quot;   &quot;dns&quot;   &quot;b10&quot;   &quot;SCI_2&quot; &quot;p10&quot;   &quot;ske&quot;   &quot;d01&quot;  </code></pre>
 <pre class="r"><code># plot the results
 plot(results, type=c(&quot;g&quot;, &quot;o&quot;))</code></pre>
-<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-13-2.png" width="672" style="display: block; margin: auto;" /></p>
-<details> <summary><em>Expand here to see past versions of unnamed-chunk-13-2.png:</em></summary>
+<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-16-2.png" width="1152" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of unnamed-chunk-16-2.png:</em></summary>
 <table style="border-collapse:separate; border-spacing:5px;">
 <thead>
 <tr>
@@ -1532,7 +1408,7 @@ Date
 <tbody>
 <tr>
 <td style="text-align:left;">
-<a href="https://github.com/jonathandash/understorey/blob/d209b07320bfc98ec99e1e3c43df218e1fee1bae/docs/figure/initial-analysis.Rmd/unnamed-chunk-13-2.png" target="_blank">d209b07</a>
+<a href="https://github.com/jonathandash/understorey/blob/d209b07320bfc98ec99e1e3c43df218e1fee1bae/docs/figure/initial-analysis.Rmd/unnamed-chunk-16-2.png" target="_blank">d209b07</a>
 </td>
 <td style="text-align:left;">
 jonathandash
@@ -1544,6 +1420,61 @@ jonathandash
 </tbody>
 </table>
 <p></details></p>
+<p>Now use these predictors to model native understorey canopy cover percentage by fitting a RF model with the selected predictors.</p>
+<pre><code>Random Forest 
+
+70 samples
+ 5 predictor
+
+No pre-processing
+Resampling: Bootstrapped (25 reps) 
+Summary of sample sizes: 70, 70, 70, 70, 70, 70, ... 
+Resampling results across tuning parameters:
+
+  mtry  splitrule   RMSE       Rsquared   MAE      
+  2     variance    0.9592306  0.5293575  0.7828987
+  2     extratrees  0.9588135  0.5368442  0.7734945
+  3     variance    0.9698744  0.5197214  0.7930516
+  3     extratrees  0.9487585  0.5439258  0.7675013
+  5     variance    0.9908640  0.5052240  0.8137463
+  5     extratrees  0.9357671  0.5539153  0.7588475
+
+Tuning parameter &#39;min.node.size&#39; was held constant at a value of 5
+RMSE was used to select the optimal model using the smallest value.
+The final values used for the model were mtry = 5, splitrule =
+ extratrees and min.node.size = 5.</code></pre>
+<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-17-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<details> <summary><em>Expand here to see past versions of unnamed-chunk-17-1.png:</em></summary>
+<table style="border-collapse:separate; border-spacing:5px;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Version
+</th>
+<th style="text-align:left;">
+Author
+</th>
+<th style="text-align:left;">
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<a href="https://github.com/jonathandash/understorey/blob/d209b07320bfc98ec99e1e3c43df218e1fee1bae/docs/figure/initial-analysis.Rmd/unnamed-chunk-17-1.png" target="_blank">d209b07</a>
+</td>
+<td style="text-align:left;">
+jonathandash
+</td>
+<td style="text-align:left;">
+2018-08-27
+</td>
+</tr>
+</tbody>
+</table>
+<p></details></p>
+<p>```</p>
 <p>Use the same approach for Tree fern stems</p>
 <pre class="r"><code># treefernstems
 
@@ -1566,60 +1497,30 @@ print(importance)</code></pre>
 
   only 20 most important variables shown (out of 78)
 
-          Overall
-b10       2.84375
-int_p99   1.66323
-SCI_5     1.00134
-int_qav   0.32194
-c02       0.31372
-int_ske   0.25819
-ske       0.23981
-SCI_2     0.23600
-d02       0.17349
-D1_ENL    0.14025
-p25       0.12737
-int_max   0.11943
-dns       0.08458
-int_kur   0.06658
-int_std   0.05879
-medint_fc 0.05617
-p10       0.05565
-kur       0.05089
-b25       0.04493
-SCI_0.3   0.03979</code></pre>
+            Overall
+b10         1.91779
+int_p99     1.21813
+SCI_5       1.00007
+SCI_2       0.74915
+dns         0.55576
+ske         0.32176
+p10         0.26362
+int_max     0.24668
+c02         0.23432
+int_ske     0.21461
+p25         0.18981
+b05         0.16809
+int_std     0.15646
+int_qav     0.14369
+D1_ENL      0.13688
+int_kur     0.12077
+b25         0.09028
+d02         0.07776
+PccFrom_2_m 0.05445
+SCI_0.3     0.05249</code></pre>
 <pre class="r"><code># plot importance
 plot(importance)</code></pre>
-<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-14-1.png" width="672" style="display: block; margin: auto;" /></p>
-<details> <summary><em>Expand here to see past versions of unnamed-chunk-14-1.png:</em></summary>
-<table style="border-collapse:separate; border-spacing:5px;">
-<thead>
-<tr>
-<th style="text-align:left;">
-Version
-</th>
-<th style="text-align:left;">
-Author
-</th>
-<th style="text-align:left;">
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-<a href="https://github.com/jonathandash/understorey/blob/d209b07320bfc98ec99e1e3c43df218e1fee1bae/docs/figure/initial-analysis.Rmd/unnamed-chunk-14-1.png" target="_blank">d209b07</a>
-</td>
-<td style="text-align:left;">
-jonathandash
-</td>
-<td style="text-align:left;">
-2018-08-27
-</td>
-</tr>
-</tbody>
-</table>
-<p></details></p>
+<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-18-1.png" width="1152" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>#### Feature Selection ####
 set.seed(7)
 
@@ -1654,37 +1555,7 @@ predictors(results)</code></pre>
 <pre><code>[1] &quot;SCI_5&quot;       &quot;int_p99&quot;     &quot;b10&quot;         &quot;dns&quot;         &quot;PccFrom_5_m&quot;</code></pre>
 <pre class="r"><code># plot the results
 plot(results, type=c(&quot;g&quot;, &quot;o&quot;))</code></pre>
-<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-14-2.png" width="672" style="display: block; margin: auto;" /></p>
-<details> <summary><em>Expand here to see past versions of unnamed-chunk-14-2.png:</em></summary>
-<table style="border-collapse:separate; border-spacing:5px;">
-<thead>
-<tr>
-<th style="text-align:left;">
-Version
-</th>
-<th style="text-align:left;">
-Author
-</th>
-<th style="text-align:left;">
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-<a href="https://github.com/jonathandash/understorey/blob/d209b07320bfc98ec99e1e3c43df218e1fee1bae/docs/figure/initial-analysis.Rmd/unnamed-chunk-14-2.png" target="_blank">d209b07</a>
-</td>
-<td style="text-align:left;">
-jonathandash
-</td>
-<td style="text-align:left;">
-2018-08-27
-</td>
-</tr>
-</tbody>
-</table>
-<p></details></p>
+<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-18-2.png" width="1152" style="display: block; margin: auto;" /></p>
 <p>Number of native stems</p>
 <pre class="r"><code>#native stems
 
@@ -1753,37 +1624,7 @@ int_qav      0.3652
 SCI_2        0.3017</code></pre>
 <pre class="r"><code># plot importance
 plot(importance)</code></pre>
-<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-15-1.png" width="672" style="display: block; margin: auto;" /></p>
-<details> <summary><em>Expand here to see past versions of unnamed-chunk-15-1.png:</em></summary>
-<table style="border-collapse:separate; border-spacing:5px;">
-<thead>
-<tr>
-<th style="text-align:left;">
-Version
-</th>
-<th style="text-align:left;">
-Author
-</th>
-<th style="text-align:left;">
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-<a href="https://github.com/jonathandash/understorey/blob/d209b07320bfc98ec99e1e3c43df218e1fee1bae/docs/figure/initial-analysis.Rmd/unnamed-chunk-15-1.png" target="_blank">d209b07</a>
-</td>
-<td style="text-align:left;">
-jonathandash
-</td>
-<td style="text-align:left;">
-2018-08-27
-</td>
-</tr>
-</tbody>
-</table>
-<p></details></p>
+<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-19-1.png" width="1152" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>#### Feature Selection ####
 set.seed(7)
 
@@ -1818,37 +1659,7 @@ predictors(results)</code></pre>
 <pre><code>[1] &quot;c01&quot;    &quot;d01&quot;    &quot;p05&quot;    &quot;cov_2&quot;  &quot;cov_03&quot;</code></pre>
 <pre class="r"><code># plot the results
 plot(results, type=c(&quot;g&quot;, &quot;o&quot;))</code></pre>
-<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-15-2.png" width="672" style="display: block; margin: auto;" /></p>
-<details> <summary><em>Expand here to see past versions of unnamed-chunk-15-2.png:</em></summary>
-<table style="border-collapse:separate; border-spacing:5px;">
-<thead>
-<tr>
-<th style="text-align:left;">
-Version
-</th>
-<th style="text-align:left;">
-Author
-</th>
-<th style="text-align:left;">
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-<a href="https://github.com/jonathandash/understorey/blob/d209b07320bfc98ec99e1e3c43df218e1fee1bae/docs/figure/initial-analysis.Rmd/unnamed-chunk-15-2.png" target="_blank">d209b07</a>
-</td>
-<td style="text-align:left;">
-jonathandash
-</td>
-<td style="text-align:left;">
-2018-08-27
-</td>
-</tr>
-</tbody>
-</table>
-<p></details></p>
+<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-19-2.png" width="1152" style="display: block; margin: auto;" /></p>
 <p>Number of native stem species</p>
 <pre class="r"><code>#nativestemspecies
 
@@ -1894,37 +1705,7 @@ cov_2        0.004735
 cov_12       0.004578</code></pre>
 <pre class="r"><code># plot importance
 plot(importance)</code></pre>
-<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-16-1.png" width="672" style="display: block; margin: auto;" /></p>
-<details> <summary><em>Expand here to see past versions of unnamed-chunk-16-1.png:</em></summary>
-<table style="border-collapse:separate; border-spacing:5px;">
-<thead>
-<tr>
-<th style="text-align:left;">
-Version
-</th>
-<th style="text-align:left;">
-Author
-</th>
-<th style="text-align:left;">
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-<a href="https://github.com/jonathandash/understorey/blob/d209b07320bfc98ec99e1e3c43df218e1fee1bae/docs/figure/initial-analysis.Rmd/unnamed-chunk-16-1.png" target="_blank">d209b07</a>
-</td>
-<td style="text-align:left;">
-jonathandash
-</td>
-<td style="text-align:left;">
-2018-08-27
-</td>
-</tr>
-</tbody>
-</table>
-<p></details></p>
+<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-20-1.png" width="1152" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>#### Feature Selection ####
 set.seed(7)
 
@@ -1959,37 +1740,7 @@ predictors(results)</code></pre>
 <pre><code>[1] &quot;c01&quot;    &quot;d01&quot;    &quot;b10&quot;    &quot;VCI_h2&quot; &quot;p25&quot;   </code></pre>
 <pre class="r"><code># plot the results
 plot(results, type=c(&quot;g&quot;, &quot;o&quot;))</code></pre>
-<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-16-2.png" width="672" style="display: block; margin: auto;" /></p>
-<details> <summary><em>Expand here to see past versions of unnamed-chunk-16-2.png:</em></summary>
-<table style="border-collapse:separate; border-spacing:5px;">
-<thead>
-<tr>
-<th style="text-align:left;">
-Version
-</th>
-<th style="text-align:left;">
-Author
-</th>
-<th style="text-align:left;">
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-<a href="https://github.com/jonathandash/understorey/blob/d209b07320bfc98ec99e1e3c43df218e1fee1bae/docs/figure/initial-analysis.Rmd/unnamed-chunk-16-2.png" target="_blank">d209b07</a>
-</td>
-<td style="text-align:left;">
-jonathandash
-</td>
-<td style="text-align:left;">
-2018-08-27
-</td>
-</tr>
-</tbody>
-</table>
-<p></details></p>
+<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-20-2.png" width="1152" style="display: block; margin: auto;" /></p>
 <p>Number of native species</p>
 <pre class="r"><code>#nativespecies
 
@@ -2035,37 +1786,7 @@ VCI_h12         0.01855
 PccFrom_5_m     0.01745</code></pre>
 <pre class="r"><code># plot importance
 plot(importance)</code></pre>
-<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-17-1.png" width="672" style="display: block; margin: auto;" /></p>
-<details> <summary><em>Expand here to see past versions of unnamed-chunk-17-1.png:</em></summary>
-<table style="border-collapse:separate; border-spacing:5px;">
-<thead>
-<tr>
-<th style="text-align:left;">
-Version
-</th>
-<th style="text-align:left;">
-Author
-</th>
-<th style="text-align:left;">
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-<a href="https://github.com/jonathandash/understorey/blob/d209b07320bfc98ec99e1e3c43df218e1fee1bae/docs/figure/initial-analysis.Rmd/unnamed-chunk-17-1.png" target="_blank">d209b07</a>
-</td>
-<td style="text-align:left;">
-jonathandash
-</td>
-<td style="text-align:left;">
-2018-08-27
-</td>
-</tr>
-</tbody>
-</table>
-<p></details></p>
+<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-21-1.png" width="1152" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>#### Feature Selection ####
 set.seed(7)
 
@@ -2117,37 +1838,7 @@ predictors(results)</code></pre>
 [69] &quot;p25&quot;          </code></pre>
 <pre class="r"><code># plot the results
 plot(results, type=c(&quot;g&quot;, &quot;o&quot;))</code></pre>
-<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-17-2.png" width="672" style="display: block; margin: auto;" /></p>
-<details> <summary><em>Expand here to see past versions of unnamed-chunk-17-2.png:</em></summary>
-<table style="border-collapse:separate; border-spacing:5px;">
-<thead>
-<tr>
-<th style="text-align:left;">
-Version
-</th>
-<th style="text-align:left;">
-Author
-</th>
-<th style="text-align:left;">
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-<a href="https://github.com/jonathandash/understorey/blob/d209b07320bfc98ec99e1e3c43df218e1fee1bae/docs/figure/initial-analysis.Rmd/unnamed-chunk-17-2.png" target="_blank">d209b07</a>
-</td>
-<td style="text-align:left;">
-jonathandash
-</td>
-<td style="text-align:left;">
-2018-08-27
-</td>
-</tr>
-</tbody>
-</table>
-<p></details></p>
+<p><img src="figure/initial-analysis.Rmd/unnamed-chunk-21-2.png" width="1152" style="display: block; margin: auto;" /></p>
 </div>
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
@@ -2170,46 +1861,47 @@ attached base packages:
 [8] methods   base     
 
 other attached packages:
- [1] party_1.3-1         strucchange_1.5-1   sandwich_2.5-0     
- [4] zoo_1.8-3           modeltools_0.2-22   mvtnorm_1.0-8      
- [7] caret_6.0-80        lattice_0.20-35     randomForest_4.6-14
-[10] corrplot_0.84       forcats_0.3.0       stringr_1.3.1      
-[13] dplyr_0.7.6         purrr_0.2.5         readr_1.1.1        
-[16] tidyr_0.8.1         tibble_1.4.2        ggplot2_3.0.0      
-[19] tidyverse_1.2.1     here_0.1           
+ [1] raster_2.6-7        sp_1.3-1            party_1.3-1        
+ [4] strucchange_1.5-1   sandwich_2.5-0      zoo_1.8-3          
+ [7] modeltools_0.2-22   mvtnorm_1.0-8       caret_6.0-80       
+[10] lattice_0.20-35     randomForest_4.6-14 corrplot_0.84      
+[13] forcats_0.3.0       stringr_1.3.1       dplyr_0.7.6        
+[16] purrr_0.2.5         readr_1.1.1         tidyr_0.8.1        
+[19] tibble_1.4.2        ggplot2_3.0.0       tidyverse_1.2.1    
+[22] here_0.1            knitr_1.20         
 
 loaded via a namespace (and not attached):
- [1] nlme_3.1-137       lubridate_1.7.4    dimRed_0.1.0      
- [4] httr_1.3.1         rprojroot_1.3-2    tools_3.5.1       
- [7] backports_1.1.2    R6_2.2.2           rpart_4.1-13      
-[10] lazyeval_0.2.1     colorspace_1.3-2   nnet_7.3-12       
-[13] withr_2.1.2        tidyselect_0.2.4   mnormt_1.5-5      
-[16] compiler_3.5.1     git2r_0.23.0       cli_1.0.0         
-[19] rvest_0.3.2        xml2_1.2.0         scales_0.5.0      
-[22] sfsmisc_1.1-2      DEoptimR_1.0-8     psych_1.8.4       
-[25] robustbase_0.93-2  digest_0.6.15      foreign_0.8-70    
-[28] rmarkdown_1.10     R.utils_2.6.0      pkgconfig_2.0.1   
-[31] htmltools_0.3.6    rlang_0.2.1        readxl_1.1.0      
-[34] ddalpha_1.3.4      rstudioapi_0.7     bindr_0.1.1       
-[37] jsonlite_1.5       ModelMetrics_1.2.0 R.oo_1.22.0       
-[40] magrittr_1.5       Matrix_1.2-14      Rcpp_0.12.17      
-[43] munsell_0.5.0      abind_1.4-5        R.methodsS3_1.7.1 
-[46] multcomp_1.4-8     stringi_1.1.7      whisker_0.3-2     
-[49] yaml_2.1.19        MASS_7.3-50        plyr_1.8.4        
-[52] recipes_0.1.3      pls_2.7-0          parallel_3.5.1    
-[55] crayon_1.3.4       haven_1.1.2        splines_3.5.1     
-[58] hms_0.4.2          knitr_1.20         pillar_1.3.0      
-[61] ranger_0.10.1      reshape2_1.4.3     codetools_0.2-15  
-[64] CVST_0.2-2         magic_1.5-8        glue_1.2.0        
-[67] evaluate_0.10.1    data.table_1.11.4  modelr_0.1.2      
-[70] foreach_1.4.4      cellranger_1.1.0   gtable_0.2.0      
-[73] kernlab_0.9-27     assertthat_0.2.0   DRR_0.0.3         
-[76] gower_0.1.2        coin_1.2-2         prodlim_2018.04.18
-[79] broom_0.4.5        e1071_1.7-0        class_7.3-14      
-[82] survival_2.42-3    geometry_0.3-6     timeDate_3043.102 
-[85] RcppRoll_0.3.0     iterators_1.0.10   lava_1.6.3        
-[88] workflowr_1.1.1    bindrcpp_0.2.2     TH.data_1.0-9     
-[91] ipred_0.9-7       </code></pre>
+ [1] TH.data_1.0-9      colorspace_1.3-2   class_7.3-14      
+ [4] rgdal_1.3-4        rprojroot_1.3-2    pls_2.7-0         
+ [7] rstudioapi_0.7     DRR_0.0.3          prodlim_2018.04.18
+[10] lubridate_1.7.4    coin_1.2-2         ranger_0.10.1     
+[13] xml2_1.2.0         codetools_0.2-15   splines_3.5.1     
+[16] R.methodsS3_1.7.1  mnormt_1.5-5       robustbase_0.93-2 
+[19] RcppRoll_0.3.0     jsonlite_1.5       workflowr_1.1.1   
+[22] broom_0.4.5        ddalpha_1.3.4      kernlab_0.9-27    
+[25] R.oo_1.22.0        sfsmisc_1.1-2      compiler_3.5.1    
+[28] httr_1.3.1         backports_1.1.2    assertthat_0.2.0  
+[31] Matrix_1.2-14      lazyeval_0.2.1     cli_1.0.0         
+[34] htmltools_0.3.6    tools_3.5.1        bindrcpp_0.2.2    
+[37] gtable_0.2.0       glue_1.2.0         reshape2_1.4.3    
+[40] Rcpp_0.12.17       cellranger_1.1.0   nlme_3.1-137      
+[43] iterators_1.0.10   psych_1.8.4        timeDate_3043.102 
+[46] gower_0.1.2        rvest_0.3.2        DEoptimR_1.0-8    
+[49] MASS_7.3-50        scales_0.5.0       ipred_0.9-7       
+[52] hms_0.4.2          parallel_3.5.1     yaml_2.1.19       
+[55] rpart_4.1-13       stringi_1.1.7      foreach_1.4.4     
+[58] e1071_1.7-0        lava_1.6.3         geometry_0.3-6    
+[61] rlang_0.2.1        pkgconfig_2.0.1    evaluate_0.10.1   
+[64] bindr_0.1.1        recipes_0.1.3      CVST_0.2-2        
+[67] tidyselect_0.2.4   plyr_1.8.4         magrittr_1.5      
+[70] R6_2.2.2           multcomp_1.4-8     dimRed_0.1.0      
+[73] pillar_1.3.0       haven_1.1.2        whisker_0.3-2     
+[76] foreign_0.8-70     withr_2.1.2        survival_2.42-3   
+[79] abind_1.4-5        nnet_7.3-12        modelr_0.1.2      
+[82] crayon_1.3.4       rmarkdown_1.10     readxl_1.1.0      
+[85] data.table_1.11.4  git2r_0.23.0       ModelMetrics_1.2.0
+[88] digest_0.6.15      R.utils_2.6.0      munsell_0.5.0     
+[91] magic_1.5-8       </code></pre>
 </div>
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
